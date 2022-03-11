@@ -83,7 +83,7 @@ public struct TezosKeypair {
 }
 
 extension TezosKeypair {
-    public func publicKeyToAddress(publicKey:Data) -> String {
+    public static func publicKeyToAddress(publicKey:Data) -> String {
         let publicHash = Sodium().genericHash.hash(message:publicKey.bytes, outputLength: 20)
         let addressData = TezosPrefix.tz1+publicHash!
         return Base58.base58CheckEncode(addressData)
