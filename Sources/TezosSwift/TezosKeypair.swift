@@ -30,7 +30,7 @@ public struct TezosKeypair {
     }
     
     public var address:String {
-        return self.publicKeyToAddress(publicKey: publicKey)
+        return Self.publicKeyToAddress(publicKey: publicKey)
     }
     
     private init(keyPair: Ed25519KeyPair) {
