@@ -29,8 +29,18 @@ public struct TezosKeypair {
         return self.keyPair!.publicKey.raw
     }
     
+    public var publicKeyHash: Data? {
+        guard let hashedBytes = Sodium().genericHash.hash(message:publicKey.bytes, outputLength: 20) else {
+            return nil
+        }
+        return Data(hashedBytes)
+    }
+    
     public var address:String {
-        return Self.publicKeyToAddress(publicKey: publicKey)
+        guard let _publicKeyHash = publicKeyHash else {
+            return ""
+        }
+        return Self.publicKeyHashToAddress(publicKeyHash: _publicKeyHash)
     }
     
     private init(keyPair: Ed25519KeyPair) {
@@ -38,7 +48,7 @@ public struct TezosKeypair {
     }
     
     public init(secretKey: [UInt8]) throws {
-        let scretKeyBytes = Array(secretKey[4...secretKey.endIndex-1])
+        let scretKeyBytes = Array(secretKey[4..<secretKey.endIndex])
         let keyPair = try Ed25519KeyPair(raw: Data(scretKeyBytes))
         self.init(keyPair: keyPair)
     }
@@ -83,10 +93,17 @@ public struct TezosKeypair {
 }
 
 extension TezosKeypair {
-    public static func publicKeyToAddress(publicKey:Data) -> String {
-        let publicHash = Sodium().genericHash.hash(message:publicKey.bytes, outputLength: 20)
-        let addressData = TezosPrefix.tz1+publicHash!
-        return Base58.base58CheckEncode(addressData)
+    
+    public static func publicKeyHashToAddress(publicKeyHash:Data) -> String {
+        let addressBytes = TezosPrefix.tz1+publicKeyHash.bytes
+        return Base58.base58CheckEncode(addressBytes)
+    }
+    
+    public static func addressToPublicKeyHash(address:String) -> Data? {
+        guard let addressBytes = Base58.base58CheckDecode(address) else {
+            return nil
+        }
+        return Data(addressBytes[3..<addressBytes.endIndex])
     }
 }
 
