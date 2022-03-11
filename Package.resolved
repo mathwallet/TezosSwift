@@ -1,0 +1,70 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "Base58Swift",
+        "repositoryURL": "https://github.com/mathwallet/Base58Swift.git",
+        "state": {
+          "branch": "master",
+          "revision": "916940466f7e149b4029832ba5521252d7d68d92",
+          "version": null
+        }
+      },
+      {
+        "package": "BigInt",
+        "repositoryURL": "https://github.com/attaswift/BigInt.git",
+        "state": {
+          "branch": null,
+          "revision": "0ed110f7555c34ff468e72e1686e59721f2b0da6",
+          "version": "5.3.0"
+        }
+      },
+      {
+        "package": "BIP39swift",
+        "repositoryURL": "https://github.com/mathwallet/BIP39swift",
+        "state": {
+          "branch": null,
+          "revision": "6e654c1fedac7dc3f01443d8bdf108ab6d50245d",
+          "version": "1.0.1"
+        }
+      },
+      {
+        "package": "CryptoSwift",
+        "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
+        "state": {
+          "branch": null,
+          "revision": "12f2389aca4a07e0dd54c86ec23d0721ed88b8db",
+          "version": "1.4.3"
+        }
+      },
+      {
+        "package": "Sr25519",
+        "repositoryURL": "https://github.com/lishuailibertine/Sr25519.swift.git",
+        "state": {
+          "branch": null,
+          "revision": "678f9454384273c468f65903faa76b8358a372ef",
+          "version": "0.1.6"
+        }
+      },
+      {
+        "package": "Sodium",
+        "repositoryURL": "https://github.com/jedisct1/swift-sodium.git",
+        "state": {
+          "branch": null,
+          "revision": "4f9164a0a2c9a6a7ff53a2833d54a5c79c957342",
+          "version": "0.9.1"
+        }
+      },
+      {
+        "package": "UncommonCrypto",
+        "repositoryURL": "https://github.com/lishuailibertine/UncommonCrypto.swift",
+        "state": {
+          "branch": null,
+          "revision": "db2fae114255fd17ae7bf46dff3a7997af98b626",
+          "version": "0.1.4"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
