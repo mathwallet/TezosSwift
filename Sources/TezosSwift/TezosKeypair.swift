@@ -10,7 +10,7 @@ struct TezosPrefix {
     static let tz1:[UInt8] = [6, 161, 159]
 }
 
-struct TezosKeypair {
+public struct TezosKeypair {
     public var mnemonics: String?
     
     public var derivePath: String?
