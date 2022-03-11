@@ -53,7 +53,7 @@ public struct TezosKeypair {
         self.init(keyPair: keyPair)
     }
     
-    public init?(privateKey:String) throws {
+    public init(privateKey:String) throws {
         guard let privateBytes = Base58.base58CheckDecode(privateKey) else {
             throw Error.invalidPrivateKey
         }
