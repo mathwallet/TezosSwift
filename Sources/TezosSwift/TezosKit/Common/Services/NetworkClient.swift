@@ -121,9 +121,9 @@ public class NetworkClientImpl: NetworkClient {
     Logger.shared.log(">>>>>> End Request", level: .debug)
 
     let request = urlSession.dataTask(with: urlRequest) { [weak self] data, response, error in
-      guard let self = self else {
-        return
-      }
+//      guard let self = self else {
+//        return
+//      }
 
       Logger.shared.log("<<<<<< Response", level: .debug)
       Logger.shared.log("Endpoint: \(remoteNodeEndpoint)", level: .debug)
