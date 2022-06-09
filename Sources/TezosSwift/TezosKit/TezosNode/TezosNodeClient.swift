@@ -164,10 +164,20 @@ public class TezosNodeClient {
     self.run(rpc, completion: completion)
   }
 
+  /// Retrieve the balance of a given wallet.
+  public func getBalance(wallet: Wallet, completion: @escaping (Result<Tez, TezosKitError>) -> Void) {
+    getBalance(address: wallet.address, completion: completion)
+  }
+
   /// Retrieve the balance of a given address.
   public func getBalance(address: Address, completion: @escaping (Result<Tez, TezosKitError>) -> Void) {
     let rpc = GetAddressBalanceRPC(address: address)
     self.run(rpc, completion: completion)
+  }
+
+  /// Retrieve the delegate of a given wallet.
+  public func getDelegate(wallet: Wallet, completion: @escaping (Result<String, TezosKitError>) -> Void) {
+    getDelegate(address: wallet.address, completion: completion)
   }
 
   /// Retrieve the delegate of a given address.
@@ -278,13 +288,13 @@ public class TezosNodeClient {
     self.run(rpc, completion: completion)
   }
 
-  /// Retrieve a value from a big map. 
+  /// Retrieve a value from a big map.
   ///
   /// - Parameters:
   ///   - bigMapID: The ID of the big map.
   ///   - key: The key in the big map to look up.
   ///   - type: The michelson type of the key.
-  ///   - completion: A completion block to call.  
+  ///   - completion: A completion block to call.
   public func getBigMapValue(
     bigMapID: BigInt,
     key: MichelsonParameter,
@@ -663,10 +673,10 @@ public class TezosNodeClient {
   ///   - completion: A completion block to call.
   public func runOperation(
     _ operation: Operation,
-    from address: Address,
+    from wallet: Wallet,
     completion: @escaping (Result<SimulationResult, TezosKitError>) -> Void
   ) {
-    simulationService.simulate(operation, from: address, signatureProvider: wallet, completion: completion)
+    simulationService.simulate(operation, from: wallet.address, signatureProvider: wallet, completion: completion)
   }
 
   // MARK: - Private Methods

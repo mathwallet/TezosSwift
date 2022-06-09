@@ -295,7 +295,7 @@ public class DexterExchangeClient {
     tokensToSell: Decimal,
     minTezToBuy: Tez,
     deadline: Date
-  ) -> Result<Operation, TezosKitError> {
+  ) -> Result <Operation, TezosKitError> {
 	guard let minMutezToBuy = Decimal(string: minTezToBuy.rpcRepresentation) else {
     return .failure(.unknown(description: nil))
   }

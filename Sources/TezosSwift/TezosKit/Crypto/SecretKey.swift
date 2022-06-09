@@ -2,7 +2,6 @@
 
 import Base58Swift
 import Foundation
-//import MnemonicKit
 import CSecp256k1
 import Sodium
 
@@ -33,43 +32,13 @@ public struct SecretKey {
   ///   - passphrase: An optional passphrase to use. Default is the empty string.
   ///   - signingCurve: The elliptical curve to use for the key. Defaults to ed25519.
   /// - Returns: A representative secret key, or nil if an invalid mnemonic was given.
-//  public init?(mnemonic: String, passphrase: String = "", signingCurve: EllipticalCurve = .ed25519) {
-//    guard let seedString = Mnemonic.deterministicSeedString(from: mnemonic, passphrase: passphrase) else {
-//      return nil
-//    }
-//    self.init(
-//      seedString: String(seedString[..<seedString.index(seedString.startIndex, offsetBy: 64)]),
-//      signingCurve: signingCurve
-//    )
-//  }
-
-  /// Initialize a key with the given hex seed string.
-  ///
-  ///  - Parameters:
-  ///    - seedString a hex encoded seed string.
-  ///    - signingCurve: The elliptical curve to use for the key. Defaults to ed25519.
-  /// - Returns: A representative secret key, or nil if the seed string was in an unexpected format.
-  public init?(seedString: String, signingCurve: EllipticalCurve = .ed25519) {
-    guard
-      let seed = Sodium.shared.utils.hex2bin(seedString),
-      let keyPair = Sodium.shared.sign.keyPair(seed: seed)
-    else {
-      return nil
-    }
-
-    // Key is 64 bytes long. The first 32 bytes are the private key. Sodium, the ed25519 library expects extended
-    // private keys, so pass down the full 64 bytes.
-    let secretKeyBytes = keyPair.secretKey
-    switch signingCurve {
-    case .ed25519:
-      self.init(secretKeyBytes, signingCurve: signingCurve)
-    case .secp256k1:
-      let privateKeyBytes = Array(secretKeyBytes[..<32])
-      self.init(privateKeyBytes, signingCurve: signingCurve)
-    case .p256:
-      fatalError("unimplemented")
-    }
-
+  public init?(mnemonic: String, passphrase: String = "", signingCurve: EllipticalCurve = .ed25519) {
+      do {
+          let keypair = try TezosKeypair(mnemonics: mnemonic, path: passphrase)
+          self.init(keypair.secretKey.bytes, signingCurve: signingCurve)
+      } catch {
+          return nil
+      }
   }
 
   /// Initialize a secret key with the given base58check encoded string.
