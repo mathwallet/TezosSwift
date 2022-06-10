@@ -78,7 +78,7 @@ public struct TezosRpcProvider {
 
 extension  TezosRpcProvider {
     func GET(rpcURL:RPCURL,successBlock:@escaping (_ data:Data)-> Void,failure:@escaping (_ error:Error)-> Void) {
-        AF.request(rpcURL.RPCURLString, method: .post, encoding: JSONEncoding.default, headers: nil).responseData { response in
+        AF.request(rpcURL.RPCURLString, method: .get, encoding: JSONEncoding.default, headers: nil).responseData { response in
             switch response.result {
             case .success(let data):
                 successBlock(data)
