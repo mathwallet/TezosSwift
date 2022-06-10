@@ -16,6 +16,7 @@ let package = Package(
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
+        .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.4.3"),
         .package(name: "Base58Swift", url: "https://github.com/mathwallet/Base58Swift.git", branch: "master"),
         .package(name: "Sr25519", url: "https://github.com/lishuailibertine/Sr25519.swift.git", from: "0.1.6"),
         .package(name: "Sodium", url: "https://github.com/jedisct1/swift-sodium.git", from: "0.8.0"),
@@ -28,7 +29,7 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "TezosSwift",
-            dependencies: ["Base58Swift",.product(name: "Ed25519", package: "Sr25519"),"Sodium","CryptoSwift","BIP39swift","Secp256k1Swift", .product(name: "BIP32Swift", package: "Secp256k1Swift")]),
+            dependencies: ["Alamofire","Base58Swift",.product(name: "Ed25519", package: "Sr25519"),"Sodium","CryptoSwift","BIP39swift","Secp256k1Swift", .product(name: "BIP32Swift", package: "Secp256k1Swift")]),
         .testTarget(
             name: "TezosSwiftTests",
             dependencies: ["TezosSwift"]),
