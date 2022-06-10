@@ -56,7 +56,7 @@ public struct TezosRpcProvider {
         }
         group.notify(queue: globalQueue) {
             let p:Parameters = ["chain_id": chain_id,
-                                "operation": GetTokenBalanceOperation(address: address, tokenContractAddress: contractAddress, counter: counterSting, branch: headHashString).toJsonDic() as Any
+                                "operation": GetTokenBalanceOperation(address: address, tokenContractAddress: contractAddress, counter: counterSting, branch: headHashString).toJsonDic() ?? {}
             ]
             self.POST(rpcURL: RunOperationURL(nodeUrl: nodeUrl), parameters: p) { data in
                 do {

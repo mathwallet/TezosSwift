@@ -29,7 +29,7 @@ public struct GetTokenBalanceOperation:BaseOperation {
     func toJsonString() -> String{
         do {
             let jsonData = try JSONEncoder().encode(self)
-            let dataString = String(data: jsonData, encoding: .utf8)?.replacingOccurrences(of: "\\", with: "").replacingOccurrences(of: "\"[", with: "[").replacingOccurrences(of: "]\"", with: "]")
+            let dataString = String(data: jsonData, encoding: .utf8)?.replacingOccurrences(of: "\\", with: "").replacingOccurrences(of: "\"[", with: "[").replacingOccurrences(of: "]\"", with: "]").replacingOccurrences(of: "\n", with: "").replacingOccurrences(of: "\r", with: "")
             guard let jsonString = dataString else {
                 return ""
             }
