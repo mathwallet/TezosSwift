@@ -60,6 +60,8 @@ public struct TezosRpcProvider {
             ]
             self.POST(rpcURL: RunOperationURL(nodeUrl: nodeUrl), parameters: p) { data in
                 do {
+                    var  JSONString = String(data: data, encoding: String.Encoding(rawValue: String.Encoding.utf8.rawValue))
+                    print(JSONString)
                     let result = try JSONDecoder().decode(Array<TezosTokenBalanceResult>.self, from: data)
                     guard let balance = result[0].expected else {
                         failure(TezosRpcProviderError.unknown)
