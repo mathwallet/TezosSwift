@@ -8,6 +8,8 @@ import Sodium
 struct TezosPrefix {
     static let edsk:[UInt8] = [43, 246, 78, 7]
     static let tz1:[UInt8] = [6, 161, 159]
+    static let edsig:[UInt8] = [9, 245, 205, 134, 18]
+    static let sig:[UInt8] = [4, 130, 43]
 }
 
 public struct TezosKeypair {
@@ -110,12 +112,12 @@ extension TezosKeypair {
 // MARK: - Sign&Verify
 
 extension TezosKeypair {
-    public func signDigest(messageDigest:Data) -> Data {
-        return try! Ed25519KeyPair(raw:self.secretKey).sign(message: messageDigest).raw
+    public func signDigest(messageDigest:Data) -> Data? {
+        return try! Ed25519KeyPair(raw:self.keyPair!.raw).sign(message: messageDigest).raw
     }
     
     public func verifyPublickey(message: Data, signature: Data) -> Bool {
-        return try! Ed25519KeyPair(raw:self.secretKey).verify(message: message, signature: Ed25519Signature(raw: signature))
+        return try! Ed25519KeyPair(raw:self.keyPair!.raw).verify(message: message, signature: Ed25519Signature(raw: signature))
     }
 }
 

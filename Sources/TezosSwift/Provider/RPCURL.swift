@@ -1,8 +1,8 @@
 //
-//  File.swift
+//  RPCURL.swift
 //  
 //
-//  Created by 薛跃杰 on 2022/6/9.
+//  Created by xgblin on 2022/6/9.
 //
 
 import Foundation
@@ -23,6 +23,18 @@ public struct GetChainIDURL:RPCURL {
     }
 }
 
+public struct GetHeadHeader:RPCURL {
+    let nodeUrl:String
+    
+    init(nodeUrl:String) {
+        self.nodeUrl = nodeUrl
+    }
+    
+    public var RPCURLString:String {
+        return nodeUrl + "/chains/main/blocks/head/header"
+    }
+}
+
 public struct GetHeadHashURL:RPCURL {
     let nodeUrl:String
     
@@ -32,6 +44,18 @@ public struct GetHeadHashURL:RPCURL {
     
     public var RPCURLString:String {
         return nodeUrl + "/chains/main/blocks/head/hash"
+    }
+}
+
+public struct GetBlockHeadURL:RPCURL {
+    let nodeUrl:String
+    
+    init(nodeUrl:String) {
+        self.nodeUrl = nodeUrl
+    }
+    
+    public var RPCURLString:String {
+        return nodeUrl + "/chains/main/blocks/head"
     }
 }
 
@@ -88,9 +112,63 @@ public struct GetBalanceURL:RPCURL {
     }
 }
 
+public struct GetNFTURL:RPCURL {
+    let address:String
+    let limit:String
+    init(address:String,limit:String) {
+        self.address = address
+        self.limit = limit
+    }
+    
+    public var RPCURLString:String {
+        return "https://api.tzkt.io/v1/tokens/balances?account=\(address)&sort.desc=balance&limit=\(limit)"
+    }
+}
+
+public struct RunViewURL:RPCURL {
+    let nodeUrl:String
+    public var RPCURLString:String {
+        return nodeUrl + "/chains/main/blocks/head/helpers/scripts/run_view"
+    }
+}
+
 public struct RunOperationURL:RPCURL {
     let nodeUrl:String
     public var RPCURLString:String {
         return nodeUrl + "/chains/main/blocks/head/helpers/scripts/run_operation"
+    }
+}
+
+public struct ForgeURL:RPCURL {
+    let nodeUrl:String
+    let headHash:String
+    init(nodeUrl:String,headHash:String) {
+        self.nodeUrl = nodeUrl
+        self.headHash = headHash
+    }
+    public var RPCURLString:String {
+        return nodeUrl + "/chains/main/blocks/" + headHash + "/helpers/forge/operations"
+    }
+}
+
+public struct PreapplyOperationURL:RPCURL {
+    let nodeUrl:String
+    let branch:String
+    init(nodeUrl:String,branch:String) {
+        self.nodeUrl = nodeUrl
+        self.branch = branch
+    }
+    public var RPCURLString:String {
+        return nodeUrl + "/chains/main/blocks/" + branch + "/helpers/preapply/operations"
+    }
+}
+
+public struct InjectOperationURL:RPCURL {
+    let nodeUrl:String
+    init(nodeUrl:String) {
+        self.nodeUrl = nodeUrl
+    }
+    public var RPCURLString:String {
+        return nodeUrl + "/injection/operation"
     }
 }
