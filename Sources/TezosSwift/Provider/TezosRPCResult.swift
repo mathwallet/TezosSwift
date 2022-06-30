@@ -9,9 +9,9 @@ import Foundation
 
 // MARK: ChainHead
 public struct GetChainHeadResult:Codable {
-    var hash:String?
-    var chaid_id:String?
-    var protocolString:String?
+    public var hash:String?
+    public var chaid_id:String?
+    public var protocolString:String?
     enum CodingKeys: String, CodingKey {
             case hash
             case chaid_id
@@ -26,7 +26,7 @@ public protocol GetTokenBalanceBase:Codable {
 }
 
 public struct GetFA1_2TokenBalanceResult:GetTokenBalanceBase {
-    var data:GetTokenBalanceDataResult?
+    public var data:GetTokenBalanceDataResult?
     
     public func balance() -> String {
         guard let dataResult = data, let balance = dataResult.int else {
@@ -38,27 +38,27 @@ public struct GetFA1_2TokenBalanceResult:GetTokenBalanceBase {
 // MARK: TokenBalance
 //fa2Balance
 public struct GetTokenBalanceDataResult:Codable {
-    var int:String?
+    public var int:String?
 }
 
 // MARK: NetworkConstants
 
 public struct TezosNetworkConstants:Codable {
-    var hard_gas_limit_per_operation: String?
-    var hard_storage_limit_per_operation: String?
-    var hard_gas_limit_per_block: String?
-    var origination_size: Int?
-    var cost_per_byte: String?
+    public var hard_gas_limit_per_operation: String?
+    public var hard_storage_limit_per_operation: String?
+    public var hard_gas_limit_per_block: String?
+    public var origination_size: Int?
+    public var cost_per_byte: String?
 }
 
 // MARK: Metadata
 public struct TezosBlockchainMetadata {
-    var blockHash: String
-    var protocolString: String
-    var chainId: String?
-    var counter: Int
-    var key: String
-    var constants: TezosNetworkConstants
+    public var blockHash: String
+    public var protocolString: String
+    public var chainId: String?
+    public var counter: Int
+    public var key: String
+    public var constants: TezosNetworkConstants
 }
 
 // MARK: transation
@@ -99,18 +99,18 @@ public struct SimulationResultMetadataOperationBalanceipdate:Codable {
 }
 
 public struct SimulationResponse:Codable {
-    var simulations:[SimulatedFees]
+    public var simulations:[SimulatedFees]
 }
 
 public struct SimulatedFees:Codable {
-    var type:String
-    var extraFees:[ExtraFee]
-    var consumedGas:Int
-    var consumedStorage:Int
+    public var type:String
+    public var extraFees:[ExtraFee]
+    public var consumedGas:Int
+    public var consumedStorage:Int
 }
 
 public struct ExtraFee:Codable {
-    var fee:Int
+    public var fee:Int
 }
 
 // MARK: NFT
