@@ -11,10 +11,10 @@ import Sodium
 import CryptoSwift
 
 public class TezosTransaction {
-    var signature = ""
-    var contents = [Dictionary<String,Any>]()
-    var operations = [TezosBaseOperation]()
-    var metaData:TezosBlockchainMetadata
+    public var signature = ""
+    public var contents = [Dictionary<String,Any>]()
+    public var operations = [TezosBaseOperation]()
+    public var metaData:TezosBlockchainMetadata
     let provider:TezosRpcProvider
     public init(nodeUrl:String,metaData:TezosBlockchainMetadata) {
         self.provider = TezosRpcProvider(nodeUrl: nodeUrl)
