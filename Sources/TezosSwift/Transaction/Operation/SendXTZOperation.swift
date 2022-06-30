@@ -21,7 +21,7 @@ public struct SendXTZOperation:TezosBaseOperation {
     public init(amount:String,
          storage_limit:String,
          gas_limit:String,
-         fee:String = "0",
+         fee:String,
          to:String,
          from:String,
          counter:String) {
