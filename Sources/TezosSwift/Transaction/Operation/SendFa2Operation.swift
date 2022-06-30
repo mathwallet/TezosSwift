@@ -25,7 +25,7 @@ public struct SendFa2Operation:TezosBaseOperation {
          tokenID:String,
          storage_limit:String,
          gas_limit:String,
-         fee:String,
+         fee:String = "0",
          to:String,
          from:String,
          mintAddress:String,
