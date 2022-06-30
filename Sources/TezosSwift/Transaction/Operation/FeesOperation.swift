@@ -30,6 +30,6 @@ public struct CalculatedFees{
 }
 
 public struct Maximums {
-    public let GAS = "800000"
-    public let STORAGE = "60000"
+    public static let GAS = "800000"
+    public static let STORAGE = "60000"
 }
