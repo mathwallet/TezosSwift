@@ -7,6 +7,8 @@
 
 import Foundation
 
+public let MAXGAS = "800000"
+public let MAXSTORAGE = "60000"
 public struct FeesOperation {
     var fee:Int
     var gasLimit:Int
@@ -29,7 +31,3 @@ public struct CalculatedFees{
     let accumulatedFee: FeesOperation
 }
 
-public struct Maximums {
-    public static let GAS = "800000"
-    public static let STORAGE = "60000"
-}
