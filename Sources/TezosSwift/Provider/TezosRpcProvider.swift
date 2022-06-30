@@ -7,8 +7,6 @@
 
 import Foundation
 import Alamofire
-import Lottie
-import NIOCore
 import CryptoSwift
 
 public struct TezosRpcProvider {
@@ -76,7 +74,7 @@ public struct TezosRpcProvider {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
                 let dic = json as! Dictionary<String,Any>
                 guard let dataArray = dic["data"] as? Array<Dictionary<String,Any>>, let dataResult = dataArray.first, let args = dataResult["args"] as? Array<Dictionary<String,Any>>, let balance = args[1]["int"] as? String else {
-                    failure(TezosRpcProviderError.server(message: "数据错误"))
+                    failure(TezosRpcProviderError.server(message: "data error"))
                     return
                 }
                 successBlock(balance)

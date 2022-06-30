@@ -5,11 +5,11 @@ import CryptoSwift
 import Base58Swift
 import Sodium
 
-struct TezosPrefix {
-    static let edsk:[UInt8] = [43, 246, 78, 7]
-    static let tz1:[UInt8] = [6, 161, 159]
-    static let edsig:[UInt8] = [9, 245, 205, 134, 18]
-    static let sig:[UInt8] = [4, 130, 43]
+public struct TezosPrefix {
+    public static let edsk:[UInt8] = [43, 246, 78, 7]
+    public static let tz1:[UInt8] = [6, 161, 159]
+    public static let edsig:[UInt8] = [9, 245, 205, 134, 18]
+    public static let sig:[UInt8] = [4, 130, 43]
 }
 
 public struct TezosKeypair {
