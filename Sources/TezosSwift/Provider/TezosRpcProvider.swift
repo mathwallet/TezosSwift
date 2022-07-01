@@ -356,8 +356,8 @@ extension  TezosRpcProvider {
     
 //    preapplyTransaction
     public func preapplyTransaction(transaction:TezosTransaction,successBlock:@escaping (_ isSuccess:Bool)-> Void,failure:@escaping (_ error:Error)-> Void) {
-        transaction.resetOperation()
         transaction.operations.forEach { operation in
+            transaction.resetOperation()
             // calculate fee
             transaction.calculateFees(operation: operation) { haveFeeOperation in
                 // create actual trading operation
