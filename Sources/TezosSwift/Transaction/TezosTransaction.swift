@@ -113,7 +113,7 @@ public class TezosTransaction {
             return SendFa2Operation(amount: sendFa2Operation.amount, tokenID: sendFa2Operation.tokenId, storage_limit: "\(fees.storageLimit)", gas_limit: "\(fees.gasLimit)", fee: "\(fees.fee)", to: sendFa2Operation.to, from: sendFa2Operation.source, mintAddress: sendFa2Operation.destination, counter: sendFa2Operation.counter)
         case .DAPP:
             let sendDappOperation = operation as! SendDappOperation
-            return SendDappOperation(amount: sendDappOperation.amount, storage_limit: "\(fees.storageLimit)", gas_limit: "\(fees.gasLimit)", fee: "\(fees.fee)", to: sendDappOperation.destination, from: sendDappOperation.source, counter: sendDappOperation.counter, parameters: sendDappOperation.parameters)
+            return SendDappOperation(kind: sendDappOperation.kind, amount: sendDappOperation.amount, storage_limit: "\(fees.storageLimit)", gas_limit: "\(fees.gasLimit)", fee: "\(fees.fee)", to: sendDappOperation.destination, from: sendDappOperation.source, counter: sendDappOperation.counter, parameters: sendDappOperation.parameters)
         }
     }
 }

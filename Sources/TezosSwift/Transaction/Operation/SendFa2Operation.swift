@@ -78,7 +78,7 @@ public struct SendFa2Operation:TezosBaseOperation {
     
     public func payload() -> Dictionary<String, Any> {
         return [
-            "kind":"transaction",
+            "kind":kind,
             "source":source,
             "fee":fee,
             "counter":counter,
