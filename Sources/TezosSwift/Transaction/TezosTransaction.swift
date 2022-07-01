@@ -15,7 +15,11 @@ public class TezosTransaction {
     public var contents = [Dictionary<String,Any>]()
     public var operations = [TezosBaseOperation]()
     public var metadata:TezosBlockchainMetadata
+    public var forgeString:String?
     let provider:TezosRpcProvider
+    public var branch:String {
+        return self.metadata.blockHash
+    }
     public init(nodeUrl:String,metadata:TezosBlockchainMetadata) {
         self.provider = TezosRpcProvider(nodeUrl: nodeUrl)
         self.metadata = metadata
@@ -39,7 +43,7 @@ public class TezosTransaction {
         return keypair.signDigest(messageDigest: prepareData)
     }
     
-    func sign(keypair:TezosKeypair,forgeResult:String) -> (Dictionary<String,Any>,String)? {
+    public func sign(keypair:TezosKeypair,forgeResult:String) -> (Dictionary<String,Any>,String)? {
         guard let signatureData = self.signHexString(keypair: keypair, hexString:forgeResult) else {
             return nil
         }
@@ -53,7 +57,7 @@ public class TezosTransaction {
         ],sendString)
     }
     
-    public func preapplyAndSignTransaction(keypair:TezosKeypair,successBlock:@escaping (_ sendString:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
+    func preapplyAndSignTransaction(keypair:TezosKeypair,successBlock:@escaping (_ sendString:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
         operations.forEach { operation in
             // calculate fee
             self.calculateFees(operation: operation) {haveFeeOperation in

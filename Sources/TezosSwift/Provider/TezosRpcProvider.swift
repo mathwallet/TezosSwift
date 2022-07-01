@@ -356,7 +356,30 @@ extension  TezosRpcProvider {
     }
 }
 
-extension  TezosRpcProvider {
+extension TezosRpcProvider {
+    public func preapplyTransaction(transaction:TezosTransaction,successBlock:@escaping (_ transaction:TezosTransaction)-> Void,failure:@escaping (_ error:Error)-> Void) {
+        transaction.resetOperation()
+        transaction.operations.forEach { operation in
+            // calculate fee
+            transaction.calculateFees(operation: operation) { haveFeeOperation in
+                // create actual trading operation
+                transaction.addOperation(operation: haveFeeOperation)
+                // forge transaction
+                self.forge(branch: transaction.branch, operation: haveFeeOperation) { forgeResult in
+                    transaction.forgeString = forgeResult
+                    successBlock(transaction)
+                } failure: { error in
+                    failure(error)
+                }
+            } failure: { error in
+                failure(error)
+            }
+        }
+    }
+}
+
+
+extension TezosRpcProvider {
     func GET(rpcURL:RPCURL,encoding: ParameterEncoding = JSONEncoding.default, successBlock:@escaping (_ data:Data)-> Void,failure:@escaping (_ error:Error)-> Void) {
         AF.request(rpcURL.RPCURLString, method: .get, encoding: encoding, headers: nil).responseData { response in
             switch response.result {
