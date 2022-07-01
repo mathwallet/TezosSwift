@@ -101,36 +101,7 @@ public struct TezosRpcProvider {
     }
 }
 
-// MARK: transaction
-extension  TezosRpcProvider {
-    
-    public func getSimulationResponse(metadata:TezosBlockchainMetadata,operation:TezosBaseOperation,successBlock:@escaping (_ response:SimulationResponse)-> Void,failure:@escaping (_ error:Error)-> Void) {
-        let p:Parameters = [
-            "operation":[
-                "branch":metadata.blockHash,
-                "signature":"edsigtkpiSSschcaCt9pUVrpNPf7TTcgvgDEDD6NCEHMy8NNQJCGnMfLZzYoQj74yLjo9wx6MPVV29CvVzgi7qEcEUok3k7AuMg",
-                "contents":[operation.payload()]
-            ],
-            "chain_id":metadata.chainId ?? "NetXdQprcVkpaWU"
-        ]
-        self.POST(rpcURL: RunOperationURL(nodeUrl: self.nodeUrl), parameters: p) { data in
-            do {
-                let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
-                let dic = json as! Dictionary<String,Any>
-                let parser = TezosSimulationResponseParser(constants: metadata.constants)
-                let responseResult = parser.parseSimulation(jsonDic: dic)
-                successBlock(responseResult)
-            } catch let e{
-                failure(e)
-            }
-        } failure: { error in
-            failure(error)
-        }
-    }
-    
-}
-
-// MARK: GET
+// MARK: Base Data
 extension  TezosRpcProvider {
     public func getChainID(successBlock:@escaping (_ chainID:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
         self.GET(rpcURL:GetChainIDURL(nodeUrl: nodeUrl)) { data in
@@ -305,7 +276,7 @@ extension  TezosRpcProvider {
     
 }
 
-// MARK: other
+// MARK: transaction Base
 extension  TezosRpcProvider {
     public func forge(branch:String,operation:TezosBaseOperation,successBlock:@escaping (_ forgeResult:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
         self.getHeadHash { headHash in
@@ -356,7 +327,34 @@ extension  TezosRpcProvider {
     }
 }
 
-extension TezosRpcProvider {
+// MARK: Pretreatment transaction
+extension  TezosRpcProvider {
+    
+    public func getSimulationResponse(metadata:TezosBlockchainMetadata,operation:TezosBaseOperation,successBlock:@escaping (_ response:SimulationResponse)-> Void,failure:@escaping (_ error:Error)-> Void) {
+        let p:Parameters = [
+            "operation":[
+                "branch":metadata.blockHash,
+                "signature":"edsigtkpiSSschcaCt9pUVrpNPf7TTcgvgDEDD6NCEHMy8NNQJCGnMfLZzYoQj74yLjo9wx6MPVV29CvVzgi7qEcEUok3k7AuMg",
+                "contents":[operation.payload()]
+            ],
+            "chain_id":metadata.chainId ?? "NetXdQprcVkpaWU"
+        ]
+        self.POST(rpcURL: RunOperationURL(nodeUrl: self.nodeUrl), parameters: p) { data in
+            do {
+                let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
+                let dic = json as! Dictionary<String,Any>
+                let parser = TezosSimulationResponseParser(constants: metadata.constants)
+                let responseResult = parser.parseSimulation(jsonDic: dic)
+                successBlock(responseResult)
+            } catch let e{
+                failure(e)
+            }
+        } failure: { error in
+            failure(error)
+        }
+    }
+    
+//    preapplyTransaction
     public func preapplyTransaction(transaction:TezosTransaction,successBlock:@escaping (_ isSuccess:Bool)-> Void,failure:@escaping (_ error:Error)-> Void) {
         transaction.resetOperation()
         transaction.operations.forEach { operation in
@@ -376,6 +374,7 @@ extension TezosRpcProvider {
             }
         }
     }
+    
 }
 
 
