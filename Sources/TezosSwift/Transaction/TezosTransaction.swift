@@ -24,7 +24,7 @@ public class TezosTransaction {
     public var sendString:String?
     public var contents = [Dictionary<String,Any>]()
     
-    var signature = ""\
+    var signature = ""
     var operations = [TezosBaseOperation]()
     var metadata:TezosBlockchainMetadata
     var forgeString:String?
