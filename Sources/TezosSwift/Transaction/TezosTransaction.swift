@@ -11,15 +11,25 @@ import Sodium
 import CryptoSwift
 
 public class TezosTransaction {
-    public var signature = ""
-    public var contents = [Dictionary<String,Any>]()
-    public var operations = [TezosBaseOperation]()
-    public var metadata:TezosBlockchainMetadata
-    public var forgeString:String?
-    let provider:TezosRpcProvider
     public var branch:String {
         return self.metadata.blockHash
     }
+    
+    public var counter:Int {
+        return self.metadata.counter
+    }
+    
+    public var operationDictionary:Dictionary<String,Any>?
+    
+    public var sendString:String?
+    
+    var signature = ""
+    var contents = [Dictionary<String,Any>]()
+    var operations = [TezosBaseOperation]()
+    var metadata:TezosBlockchainMetadata
+    var forgeString:String?
+    
+    let provider:TezosRpcProvider
     public init(nodeUrl:String,metadata:TezosBlockchainMetadata) {
         self.provider = TezosRpcProvider(nodeUrl: nodeUrl)
         self.metadata = metadata
@@ -43,18 +53,17 @@ public class TezosTransaction {
         return keypair.signDigest(messageDigest: prepareData)
     }
     
-    public func sign(keypair:TezosKeypair) -> (Dictionary<String,Any>,String)? {
-        guard let _forgeString = self.forgeString, let signatureData = self.signHexString(keypair: keypair, hexString:_forgeString) else {
-            return nil
+    public func sign(keypair:TezosKeypair) {
+        if let _forgeString = self.forgeString, let signatureData = self.signHexString(keypair: keypair, hexString:_forgeString) {
+            let signatureString = Base58.base58CheckEncode(TezosPrefix.edsig + signatureData.bytes)
+            self.sendString = _forgeString + signatureData.toHexString()
+            self.operationDictionary = [
+                "branch":self.metadata.blockHash,
+                "contents":contents,
+                "protocol":self.metadata.protocolString,
+                "signature":signatureString
+            ]
         }
-        let signatureString = Base58.base58CheckEncode(TezosPrefix.edsig + signatureData.bytes)
-        let sendString = _forgeString + signatureData.toHexString()
-        return ([
-            "branch":self.metadata.blockHash,
-            "contents":contents,
-            "protocol":self.metadata.protocolString,
-            "signature":signatureString
-        ],sendString)
     }
     
 //    func preapplyAndSignTransaction(keypair:TezosKeypair,successBlock:@escaping (_ sendString:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
