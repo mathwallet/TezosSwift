@@ -355,7 +355,7 @@ extension  TezosRpcProvider {
     }
     
 //    preapplyTransaction
-    public func preapplyTransaction(transaction:TezosTransaction,successBlock:@escaping (_ forgeResult:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
+    public func preapplyTransaction(transaction:TezosTransaction,successBlock:@escaping (_ isSuccess:Bool)-> Void,failure:@escaping (_ error:Error)-> Void) {
         transaction.resetOperation()
         transaction.operations.forEach { operation in
             // calculate fee
@@ -364,7 +364,8 @@ extension  TezosRpcProvider {
                 transaction.addOperation(operation: haveFeeOperation)
                 // forge transaction
                 self.forge(branch: transaction.branch, operation: haveFeeOperation) { forgeResult in
-                    successBlock(forgeResult)
+                    transaction.forgeString = forgeResult
+                    successBlock(true)
                 } failure: { error in
                     failure(error)
                 }
