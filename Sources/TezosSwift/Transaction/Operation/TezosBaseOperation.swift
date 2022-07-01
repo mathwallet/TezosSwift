@@ -23,4 +23,5 @@ public enum TezosTransactionType {
     case XTZ
     case FA1_2
     case FA2
+    case DAPP
 }
