@@ -43,12 +43,12 @@ public class TezosTransaction {
         return keypair.signDigest(messageDigest: prepareData)
     }
     
-    public func sign(keypair:TezosKeypair,forgeResult:String) -> (Dictionary<String,Any>,String)? {
-        guard let signatureData = self.signHexString(keypair: keypair, hexString:forgeResult) else {
+    public func sign(keypair:TezosKeypair) -> (Dictionary<String,Any>,String)? {
+        guard let _forgeString = self.forgeString, let signatureData = self.signHexString(keypair: keypair, hexString:_forgeString) else {
             return nil
         }
         let signatureString = Base58.base58CheckEncode(TezosPrefix.edsig + signatureData.bytes)
-        let sendString = forgeResult + signatureData.toHexString()
+        let sendString = _forgeString + signatureData.toHexString()
         return ([
             "branch":self.metadata.blockHash,
             "contents":contents,
@@ -57,37 +57,37 @@ public class TezosTransaction {
         ],sendString)
     }
     
-    func preapplyAndSignTransaction(keypair:TezosKeypair,successBlock:@escaping (_ sendString:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
-        operations.forEach { operation in
-            // calculate fee
-            self.calculateFees(operation: operation) {haveFeeOperation in
-                self.resetOperation()
-                // create actual trading operation
-                self.addOperation(operation: haveFeeOperation)
-                // forge transaction
-                self.provider.forge(branch: self.metadata.blockHash, operation: haveFeeOperation) { forgeResult in
-                    if let (operationDictionary,sendString) = self.sign(keypair: keypair, forgeResult: forgeResult) {
-                        //preapply transaction
-                        self.provider.preapplyOperation(operationDictionary:operationDictionary, branch: self.metadata.blockHash) { isSuccess in
-                            if isSuccess {
-                                successBlock(sendString)
-                            } else {
-                                failure(TezosRpcProviderError.server(message: "preapply wrong"))
-                            }
-                        } failure: { error in
-                            failure(error)
-                        }
-                    } else {
-                        failure(TezosRpcProviderError.server(message: "sign wrong"))
-                    }
-                } failure: { error in
-                    failure(error)
-                }
-            } failure: { error in
-                failure(error)
-            }
-        }
-    }
+//    func preapplyAndSignTransaction(keypair:TezosKeypair,successBlock:@escaping (_ sendString:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
+//        operations.forEach { operation in
+//            // calculate fee
+//            self.calculateFees(operation: operation) {haveFeeOperation in
+//                self.resetOperation()
+//                // create actual trading operation
+//                self.addOperation(operation: haveFeeOperation)
+//                // forge transaction
+//                self.provider.forge(branch: self.metadata.blockHash, operation: haveFeeOperation) { forgeResult in
+//                    if let (operationDictionary,sendString) = self.sign(keypair: keypair, forgeResult: forgeResult) {
+//                        //preapply transaction
+//                        self.provider.preapplyOperation(operationDictionary:operationDictionary, branch: self.metadata.blockHash) { isSuccess in
+//                            if isSuccess {
+//                                successBlock(sendString)
+//                            } else {
+//                                failure(TezosRpcProviderError.server(message: "preapply wrong"))
+//                            }
+//                        } failure: { error in
+//                            failure(error)
+//                        }
+//                    } else {
+//                        failure(TezosRpcProviderError.server(message: "sign wrong"))
+//                    }
+//                } failure: { error in
+//                    failure(error)
+//                }
+//            } failure: { error in
+//                failure(error)
+//            }
+//        }
+//    }
     
     func calculateFees(operation:TezosBaseOperation,successBlock:@escaping (_ haveFeeOperation:TezosBaseOperation)-> Void,failure:@escaping (_ error:Error)-> Void) {
         provider.getSimulationResponse(metadata: self.metadata, operation: operation) { response in
