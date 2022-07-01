@@ -14,11 +14,11 @@ public class TezosTransaction {
     public var signature = ""
     public var contents = [Dictionary<String,Any>]()
     public var operations = [TezosBaseOperation]()
-    public var metaData:TezosBlockchainMetadata
+    public var metadata:TezosBlockchainMetadata
     let provider:TezosRpcProvider
-    public init(nodeUrl:String,metaData:TezosBlockchainMetadata) {
+    public init(nodeUrl:String,metadata:TezosBlockchainMetadata) {
         self.provider = TezosRpcProvider(nodeUrl: nodeUrl)
-        self.metaData = metaData
+        self.metadata = metadata
     }
     
     public func resetOperation() {
@@ -46,9 +46,9 @@ public class TezosTransaction {
         let signatureString = Base58.base58CheckEncode(TezosPrefix.edsig + signatureData.bytes)
         let sendString = forgeResult + signatureData.toHexString()
         return ([
-            "branch":self.metaData.blockHash,
+            "branch":self.metadata.blockHash,
             "contents":contents,
-            "protocol":self.metaData.protocolString,
+            "protocol":self.metadata.protocolString,
             "signature":signatureString
         ],sendString)
     }
@@ -61,10 +61,10 @@ public class TezosTransaction {
                 // create actual trading operation
                 self.addOperation(operation: haveFeeOperation)
                 // forge transaction
-                self.provider.forge(branch: self.metaData.blockHash, operation: haveFeeOperation) { forgeResult in
+                self.provider.forge(branch: self.metadata.blockHash, operation: haveFeeOperation) { forgeResult in
                     if let (operationDictionary,sendString) = self.sign(keypair: keypair, forgeResult: forgeResult) {
                         //preapply transaction
-                        self.provider.preapplyOperation(operationDictionary:operationDictionary, branch: self.metaData.blockHash) { isSuccess in
+                        self.provider.preapplyOperation(operationDictionary:operationDictionary, branch: self.metadata.blockHash) { isSuccess in
                             if isSuccess {
                                 successBlock(sendString)
                             } else {
@@ -86,9 +86,9 @@ public class TezosTransaction {
     }
     
     func calculateFees(operation:TezosBaseOperation,successBlock:@escaping (_ haveFeeOperation:TezosBaseOperation)-> Void,failure:@escaping (_ error:Error)-> Void) {
-        provider.getSimulationResponse(metaData: self.metaData, operation: operation) { response in
+        provider.getSimulationResponse(metadata: self.metadata, operation: operation) { response in
             let service = TezosFeeEstimatorService()
-            self.provider.forge(branch:self.metaData.blockHash ,operation: operation) { forgeResult in
+            self.provider.forge(branch:self.metadata.blockHash ,operation: operation) { forgeResult in
                let fee = service.calculateFees(response: response, operationSize: service.getForgedOperationsSize(forgeResult: forgeResult))
                let haveFeeOperation =  self.createOperation(operation: operation,fees:fee.accumulatedFee)
                 successBlock(haveFeeOperation)

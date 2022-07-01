@@ -104,20 +104,20 @@ public struct TezosRpcProvider {
 // MARK: transaction
 extension  TezosRpcProvider {
     
-    public func getSimulationResponse(metaData:TezosBlockchainMetadata,operation:TezosBaseOperation,successBlock:@escaping (_ response:SimulationResponse)-> Void,failure:@escaping (_ error:Error)-> Void) {
+    public func getSimulationResponse(metadata:TezosBlockchainMetadata,operation:TezosBaseOperation,successBlock:@escaping (_ response:SimulationResponse)-> Void,failure:@escaping (_ error:Error)-> Void) {
         let p:Parameters = [
             "operation":[
-                "branch":metaData.blockHash,
+                "branch":metadata.blockHash,
                 "signature":"edsigtkpiSSschcaCt9pUVrpNPf7TTcgvgDEDD6NCEHMy8NNQJCGnMfLZzYoQj74yLjo9wx6MPVV29CvVzgi7qEcEUok3k7AuMg",
                 "contents":[operation.payload()]
             ],
-            "chain_id":metaData.chainId ?? "NetXdQprcVkpaWU"
+            "chain_id":metadata.chainId ?? "NetXdQprcVkpaWU"
         ]
         self.POST(rpcURL: RunOperationURL(nodeUrl: self.nodeUrl), parameters: p) { data in
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
                 let dic = json as! Dictionary<String,Any>
-                let parser = TezosSimulationResponseParser(constants: metaData.constants)
+                let parser = TezosSimulationResponseParser(constants: metadata.constants)
                 let responseResult = parser.parseSimulation(jsonDic: dic)
                 successBlock(responseResult)
             } catch let e{
@@ -242,7 +242,7 @@ extension  TezosRpcProvider {
         }
     }
     
-    public func getMetaData(address:String,successBlock:@escaping (_ metadata:TezosBlockchainMetadata)-> Void,failure:@escaping (_ error:Error)-> Void) {
+    public func getMetadata(address:String,successBlock:@escaping (_ metadata:TezosBlockchainMetadata)-> Void,failure:@escaping (_ error:Error)-> Void) {
         var counterNum:Int = 0
         var blockChainHead = GetChainHeadResult()
         var managerkeyString:String = ""
@@ -298,8 +298,8 @@ extension  TezosRpcProvider {
         }
         
         group.notify(queue: globalQueue) {
-            let metaData = TezosBlockchainMetadata(blockHash: blockChainHead.hash ?? "", protocolString: blockChainHead.protocolString ?? "", counter: counterNum, key:managerkeyString , constants: networkConstants)
-            successBlock(metaData)
+            let metadata = TezosBlockchainMetadata(blockHash: blockChainHead.hash ?? "", protocolString: blockChainHead.protocolString ?? "", counter: counterNum, key:managerkeyString , constants: networkConstants)
+            successBlock(metadata)
         }
     }
     
