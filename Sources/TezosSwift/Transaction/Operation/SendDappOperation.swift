@@ -20,7 +20,7 @@ public struct SendDappOperation:TezosBaseOperation {
     public var parameters:Dictionary<String, Any>
     
     public init(
-        kind:String,
+        kind:String = "transaction",
         amount:String,
         storage_limit:String,
         gas_limit:String,
