@@ -13,11 +13,11 @@ public struct TezosSimulationResponseParser {
         self.constants = constants
     }
     
-    public func parseSimulation(jsonDic:Dictionary<String,Any>) -> SimulationResponse {
+    public func parseSimulation(jsonDic:[String:Any]) -> SimulationResponse {
         var simulations = [SimulatedFees]()
-        if let contents = jsonDic["contents"] as? Array<Dictionary<String,Any>> {
+        if let contents = jsonDic["contents"] as? Array<[String:Any]> {
             contents.forEach { content in
-                if let type = content["kind"] as? String,let metadata = content["metadata"] as? Dictionary<String,Any>,let results = metadata["operation_result"] as? Dictionary<String,Any> {
+                if let type = content["kind"] as? String,let metadata = content["metadata"] as? [String:Any],let results = metadata["operation_result"] as? [String:Any] {
                     var operationExtraFees = [ExtraFee]()
                     if let allocationFee = parseAllocationFee(results: results) {
                         operationExtraFees.append(allocationFee)
@@ -29,7 +29,7 @@ public struct TezosSimulationResponseParser {
                     
                     var consumedGas = Int((results["consumed_gas"] as? String) ?? "0")  ?? 0
                     var consumedStorage = Int((results["paid_storage_size_diff"] as? String) ?? "0") ?? 0
-                    if let internalResults = metadata["internal_operation_results"] as? Array<Dictionary<String,Any>> {
+                    if let internalResults = metadata["internal_operation_results"] as? Array<[String:Any]> {
                         internalResults.forEach({ internalResult in
                             if let parsedResult = parseInternalOperationResult(internalResult: internalResult) {
                                 consumedGas += parsedResult.consumedGas
@@ -46,8 +46,8 @@ public struct TezosSimulationResponseParser {
         return SimulationResponse(simulations: simulations)
     }
     
-    private func parseAllocationFee(results: Dictionary<String,Any>) -> ExtraFee? {
-        if let _ = results["allocated_destination_contract"] as? Dictionary<String,Any>,let updates = results["balance_updates"] as? Array<Any> {
+    private func parseAllocationFee(results: [String:Any]) -> ExtraFee? {
+        if let _ = results["allocated_destination_contract"] as? [String:Any],let updates = results["balance_updates"] as? Array<Any> {
             if updates.count > 2 {
                 if let update = updates[2] as? Dictionary<String,String>, let varue = update["change"],let fee = Int(varue.replacingOccurrences(of: "-", with: "")) {
                     return ExtraFee(fee: fee)
@@ -57,7 +57,7 @@ public struct TezosSimulationResponseParser {
         return nil
     }
     
-    private func parseBurnFee(results: Dictionary<String,Any>) -> ExtraFee? {
+    private func parseBurnFee(results: [String:Any]) -> ExtraFee? {
         if let sizeDiffString = results["paid_storage_size_diff"] as? String,let sizeDiff = Int(sizeDiffString) {
             if sizeDiff > 0 {
                 let burn = sizeDiff * (Int(constants.cost_per_byte!) ?? 0)
@@ -67,8 +67,8 @@ public struct TezosSimulationResponseParser {
         return nil
     }
     
-    private func parseInternalOperationResult(internalResult:Dictionary<String,Any>) -> InternalOperationResult? {
-        if let result  = internalResult["result"] as? Dictionary<String,Any>,let internalConsumedGasStr = result["consumed_gas"] as? String,let internalConsumedStorageStr = result["paid_storage_size_diff"] as? String {
+    private func parseInternalOperationResult(internalResult:[String:Any]) -> InternalOperationResult? {
+        if let result  = internalResult["result"] as? [String:Any],let internalConsumedGasStr = result["consumed_gas"] as? String,let internalConsumedStorageStr = result["paid_storage_size_diff"] as? String {
             let internalConsumedGas = Int(internalConsumedGasStr) ?? 0
             let internalConsumedStorage = Int(internalConsumedStorageStr) ?? 0
             var extraFees = [ExtraFee]()
@@ -80,7 +80,7 @@ public struct TezosSimulationResponseParser {
                 extraFees.append(burnFee)
             }
             
-            let moreResult = internalResult["result"] as! Dictionary<String,Any>
+            let moreResult = internalResult["result"] as! [String:Any]
             let statusString = moreResult["status"] as! String
             let status = OperationResultStatus.get(status: statusString)
             return InternalOperationResult(consumedGas: internalConsumedGas,consumedStorage: internalConsumedStorage,extraFees: extraFees,status: status

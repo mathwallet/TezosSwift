@@ -73,8 +73,8 @@ public struct TezosRpcProvider {
         self.POST(rpcURL: RunViewURL(nodeUrl: self.nodeUrl), parameters: p) { data in
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
-                let dic = json as! Dictionary<String,Any>
-                guard let dataArray = dic["data"] as? Array<Dictionary<String,Any>>, let dataResult = dataArray.first, let args = dataResult["args"] as? Array<Dictionary<String,Any>>, let balance = args[1]["int"] as? String else {
+                let dic = json as! [String:Any]
+                guard let dataArray = dic["data"] as? Array<[String:Any]>, let dataResult = dataArray.first, let args = dataResult["args"] as? Array<[String:Any]>, let balance = args[1]["int"] as? String else {
                     failure(TezosRpcProviderError.server(message: "data error"))
                     return
                 }
@@ -134,7 +134,7 @@ extension  TezosRpcProvider {
         self.GET(rpcURL:GetHeadHeader(nodeUrl: nodeUrl)) { data in
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
-                let dic = json as! Dictionary<String,Any>
+                let dic = json as! [String:Any]
                 guard let height = dic["level"] as? Int else {
                     failure(TezosRpcProviderError.server(message: "数据错误"))
                     return
@@ -305,11 +305,12 @@ extension  TezosRpcProvider {
         }
     }
     
-    public func preapplyOperation(operationDictionary:Dictionary<String,Any>,branch:String,successBlock:@escaping (_ isSuccess:Bool)-> Void,failure:@escaping (_ error:Error)-> Void) {
+    public func preapplyOperation(operationDictionary:[String:Any],branch:String,successBlock:@escaping (_ isSuccess:Bool)-> Void,failure:@escaping (_ error:Error)-> Void) {
+        print(operationDictionary)
         self.POST(rpcURL: PreapplyOperationURL(nodeUrl: self.nodeUrl, branch: branch),encoding: ArrayEncoding.default, parameters: [operationDictionary].asParameters()) { data in
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
-                let jsonArray = json as! Array<Dictionary<String,Any>>
+                let jsonArray = json as! Array<[String:Any]>
                 let isSuccess = TezosPreapplyResponseParser.parse(jsonArray: jsonArray)
                 successBlock(isSuccess)
             } catch let e{
@@ -355,7 +356,7 @@ extension  TezosRpcProvider {
         self.POST(rpcURL: RunOperationURL(nodeUrl: self.nodeUrl), parameters: p) { data in
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
-                let dic = json as! Dictionary<String,Any>
+                let dic = json as! [String:Any]
                 let parser = TezosSimulationResponseParser(constants: metadata.constants)
                 let responseResult = parser.parseSimulation(jsonDic: dic)
                 successBlock(responseResult)

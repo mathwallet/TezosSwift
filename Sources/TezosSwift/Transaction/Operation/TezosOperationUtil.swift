@@ -54,6 +54,7 @@ public struct TezosOperationUtil {
         guard let data = try? JSONEncoder().encode(operation),let result = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String : Any] else {
             return nil
         }
+        print(result)
         return result
     }
 }

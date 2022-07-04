@@ -8,13 +8,13 @@
 import Foundation
 
 public struct TezosPreapplyResponseParser {
-    public static func parse(jsonArray:Array<Dictionary<String,Any>>) -> Bool {
+    public static func parse(jsonArray:Array<[String:Any]>) -> Bool {
         for dic in jsonArray {
-            guard let contents = dic["contents"] as? Array<Dictionary<String,Any>> else {
+            guard let contents = dic["contents"] as? Array<[String:Any]> else {
                 return false
             }
             for content in contents {
-                guard let metadata = content["metadata"] as? Dictionary<String,Any> ,let results = metadata["operation_result"] as? Dictionary<String,Any>,let status = results["status"] as? String else {
+                guard let metadata = content["metadata"] as? [String:Any] ,let results = metadata["operation_result"] as? [String:Any],let status = results["status"] as? String else {
                     return false
                 }
                 if OperationResultStatus.get(status: status) == .FAILED {
