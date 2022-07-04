@@ -14,16 +14,14 @@ typealias TezosParameters = Tezos.Operation.Parameters
 
 public struct TezosOperationUtil {
     
-    static func createOperation(from:String,to:String,mint:String = "",counter:String,amount:String,tokenType:TezosTransactionType,tokenId: String,metadata:TezosBlockchainMetadata)  -> Tezos.Operation? {
+    static func createOperation(from:String,to:String,mint:String = "",counter:String,amount:String,tokenType:TezosTransactionType,tokenId: String,metadata:TezosBlockchainMetadata)  -> Tezos.Operation {
         switch tokenType {
         case .XTZ:
             return Tezos.Operation.transaction(Tezos.Operation.Transaction(source: from, fee: "0", counter: counter, gasLimit: MAXGAS, storageLimit: MAXSTORAGE, amount: amount, destination: to, parameters: nil))
         case .FA1_2:
-            return Tezos.Operation.transaction(Tezos.Operation.Transaction(source: from, fee: "0", counter: counter, gasLimit: MAXGAS, storageLimit: MAXSTORAGE, amount: amount.description, destination: to, parameters: self.fa1_2Parameters(from: from, to: to, amount: amount)))
+            return Tezos.Operation.transaction(Tezos.Operation.Transaction(source: from, fee: "0", counter: counter, gasLimit: MAXGAS, storageLimit: MAXSTORAGE, amount: "0", destination: mint, parameters: self.fa1_2Parameters(from: from, to: to, amount: amount)))
         case .FA2:
-            return Tezos.Operation.transaction(Tezos.Operation.Transaction(source: from, fee: "0", counter: counter, gasLimit: MAXGAS, storageLimit: MAXSTORAGE, amount: amount.description, destination: to, parameters: self.fa2Parameters(from: from, to: to, amount: amount,tokenId: tokenId)))
-        case .DAPP:
-            return nil
+            return Tezos.Operation.transaction(Tezos.Operation.Transaction(source: from, fee: "0", counter: counter, gasLimit: MAXGAS, storageLimit: MAXSTORAGE, amount: "0", destination: mint, parameters: self.fa2Parameters(from: from, to: to, amount: amount,tokenId: tokenId)))
         }
     }
     
