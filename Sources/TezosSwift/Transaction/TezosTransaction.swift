@@ -27,7 +27,6 @@ public class TezosTransaction {
     public var contents = [[String:Any]]()
     
     var signature = ""
-    var newoperations = [Tezos.Operation]()
     var operations = [Tezos.Operation]()
     var metadata:TezosBlockchainMetadata
     var forgeString:String?
@@ -53,7 +52,7 @@ public class TezosTransaction {
     public convenience init(nodeUrl:String,from:String,to:String,mint:String = "",amount:BigUInt,tokenType:TezosTransactionType,tokenId: String = "",metadata:TezosBlockchainMetadata) {
         self.init(nodeUrl: nodeUrl, metadata: metadata)
         let operation = TezosOperationUtil.createOperation(from: from, to: to, counter:"\(metadata.counter)" , amount: amount.description, tokenType: tokenType, tokenId: tokenId,metadata:metadata)
-        self.newoperations.append(operation!)
+        self.operations.append(operation!)
     }
     
     func signHexString(keypair:TezosKeypair,hexString:String) -> Data? {
