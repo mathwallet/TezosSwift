@@ -51,7 +51,7 @@ public class TezosTransaction {
     
     public convenience init(nodeUrl:String,from:String,to:String,mint:String = "",amount:BigUInt,tokenType:TezosTransactionType,tokenId: String = "",metadata:TezosBlockchainMetadata) {
         self.init(nodeUrl: nodeUrl, metadata: metadata)
-        let operation = TezosOperationUtil.createOperation(from: from, to: to, counter:"\(metadata.counter)" , amount: amount.description, tokenType: tokenType, tokenId: tokenId,metadata:metadata)
+        let operation = TezosOperationUtil.createOperation(from: from, to: to,mint:mint, counter:"\(metadata.counter)" , amount: amount.description, tokenType: tokenType, tokenId: tokenId,metadata:metadata)
         self.operations.append(operation)
     }
     

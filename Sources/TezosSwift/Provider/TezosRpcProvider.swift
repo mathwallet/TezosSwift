@@ -306,7 +306,6 @@ extension  TezosRpcProvider {
     }
     
     public func preapplyOperation(operationDictionary:[String:Any],branch:String,successBlock:@escaping (_ isSuccess:Bool)-> Void,failure:@escaping (_ error:Error)-> Void) {
-        print(operationDictionary)
         self.POST(rpcURL: PreapplyOperationURL(nodeUrl: self.nodeUrl, branch: branch),encoding: ArrayEncoding.default, parameters: [operationDictionary].asParameters()) { data in
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
