@@ -9,6 +9,8 @@ import Foundation
 import Base58Swift
 import Sodium
 import CryptoSwift
+import BigInt
+import BeaconBlockchainTezos
 
 public class TezosTransaction {
     public var branch:String {
@@ -19,13 +21,14 @@ public class TezosTransaction {
         return self.metadata.counter
     }
     
-    public var operationDictionary:Dictionary<String,Any>?
+    public var operationDictionary:[String:Any]?
     
     public var sendString:String?
-    public var contents = [Dictionary<String,Any>]()
+    public var contents = [[String:Any]]()
     
     var signature = ""
-    var operations = [TezosBaseOperation]()
+    var newoperations = [Tezos.Operation]()
+    var operations = [Tezos.Operation]()
     var metadata:TezosBlockchainMetadata
     var forgeString:String?
     
@@ -40,9 +43,17 @@ public class TezosTransaction {
         contents.removeAll()
     }
     
-    public func addOperation(operation:TezosBaseOperation) {
+    public func addOperation(operation:Tezos.Operation) {
         operations.append(operation)
-        contents.append(operation.payload())
+        if let operationPayload = TezosOperationUtil.operationPayload(operation: operation) {
+            contents.append(operationPayload)
+        }
+    }
+    
+    public convenience init(nodeUrl:String,from:String,to:String,mint:String = "",amount:BigUInt,tokenType:TezosTransactionType,tokenId: String = "",metadata:TezosBlockchainMetadata) {
+        self.init(nodeUrl: nodeUrl, metadata: metadata)
+        let operation = TezosOperationUtil.createOperation(from: from, to: to, counter:"\(metadata.counter)" , amount: amount.description, tokenType: tokenType, tokenId: tokenId,metadata:metadata)
+        self.newoperations.append(operation!)
     }
     
     func signHexString(keypair:TezosKeypair,hexString:String) -> Data? {
@@ -66,67 +77,45 @@ public class TezosTransaction {
         }
     }
     
-//    func preapplyAndSignTransaction(keypair:TezosKeypair,successBlock:@escaping (_ sendString:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
-//        operations.forEach { operation in
-//            // calculate fee
-//            self.calculateFees(operation: operation) {haveFeeOperation in
-//                self.resetOperation()
-//                // create actual trading operation
-//                self.addOperation(operation: haveFeeOperation)
-//                // forge transaction
-//                self.provider.forge(branch: self.metadata.blockHash, operation: haveFeeOperation) { forgeResult in
-//                    if let (operationDictionary,sendString) = self.sign(keypair: keypair, forgeResult: forgeResult) {
-//                        //preapply transaction
-//                        self.provider.preapplyOperation(operationDictionary:operationDictionary, branch: self.metadata.blockHash) { isSuccess in
-//                            if isSuccess {
-//                                successBlock(sendString)
-//                            } else {
-//                                failure(TezosRpcProviderError.server(message: "preapply wrong"))
-//                            }
-//                        } failure: { error in
-//                            failure(error)
-//                        }
-//                    } else {
-//                        failure(TezosRpcProviderError.server(message: "sign wrong"))
-//                    }
-//                } failure: { error in
-//                    failure(error)
-//                }
-//            } failure: { error in
-//                failure(error)
-//            }
-//        }
-//    }
-    
-    func calculateFees(operation:TezosBaseOperation,successBlock:@escaping (_ haveFeeOperation:TezosBaseOperation)-> Void,failure:@escaping (_ error:Error)-> Void) {
-        provider.getSimulationResponse(metadata: self.metadata, operation: operation) { response in
-            let service = TezosFeeEstimatorService()
-            self.provider.forge(branch:self.metadata.blockHash ,operation: operation) { forgeResult in
-               let fee = service.calculateFees(response: response, operationSize: service.getForgedOperationsSize(forgeResult: forgeResult))
-               let haveFeeOperation =  self.createOperation(operation: operation,fees:fee.accumulatedFee)
-                successBlock(haveFeeOperation)
+    func calculateFees(operation:Tezos.Operation,successBlock:@escaping (_ haveFeeOperation:Tezos.Operation)-> Void,failure:@escaping (_ error:Error)-> Void) {
+        switch operation{
+        case .transaction(_),.reveal(_),.origination(_),.delegation(_):
+            provider.getSimulationResponse(metadata: self.metadata, operation: operation) { response in
+                let service = TezosFeeEstimatorService()
+                self.provider.forge(branch:self.metadata.blockHash ,operation: operation) { forgeResult in
+                    let fee = service.calculateFees(response: response, operationSize: service.getForgedOperationsSize(forgeResult: forgeResult))
+                    let haveFeeOperation =  self.createOperation(operation: operation,fees:fee.accumulatedFee)
+                     successBlock(haveFeeOperation)
+                } failure: { error in
+                    failure(error)
+                }
             } failure: { error in
                 failure(error)
             }
-        } failure: { error in
-            failure(error)
+        default:
+            successBlock(operation)
         }
     }
         
-    
-    public func createOperation(operation:TezosBaseOperation,fees: FeesOperation) -> TezosBaseOperation {
-        switch operation.type {
-        case .XTZ:
-            return SendXTZOperation(amount: operation.amount, storage_limit: "\(fees.storageLimit)", gas_limit: "\(fees.gasLimit)", fee:"\(fees.fee)", to: operation.destination, from: operation.source, counter:operation.counter)
-        case .FA1_2:
-            let sendFa1_2Operation = operation as! SendFa1_2Operation
-            return SendFa1_2Operation(amount: sendFa1_2Operation.amount, storage_limit: "\(fees.storageLimit)", gas_limit: "\(fees.gasLimit)", fee: "\(fees.fee)", to: sendFa1_2Operation.to, from: sendFa1_2Operation.source, mintAddress: sendFa1_2Operation.destination, counter: sendFa1_2Operation.counter)
-        case .FA2:
-            let sendFa2Operation = operation as! SendFa2Operation
-            return SendFa2Operation(amount: sendFa2Operation.amount, tokenID: sendFa2Operation.tokenId, storage_limit: "\(fees.storageLimit)", gas_limit: "\(fees.gasLimit)", fee: "\(fees.fee)", to: sendFa2Operation.to, from: sendFa2Operation.source, mintAddress: sendFa2Operation.destination, counter: sendFa2Operation.counter)
-        case .DAPP:
-            let sendDappOperation = operation as! SendDappOperation
-            return SendDappOperation(kind: sendDappOperation.kind, amount: sendDappOperation.amount, storage_limit: "\(fees.storageLimit)", gas_limit: "\(fees.gasLimit)", fee: "\(fees.fee)", to: sendDappOperation.destination, from: sendDappOperation.source, counter: sendDappOperation.counter, parameters: sendDappOperation.parameters)
+    public func createOperation(operation:Tezos.Operation,fees: FeesOperation) -> Tezos.Operation {
+        switch operation {
+        case let .transaction(content):
+            return Tezos.Operation.transaction(Tezos.Operation.Transaction(source:content.source , fee:"\(fees.fee)" , counter: content.counter, gasLimit: "\(fees.gasLimit)", storageLimit: "\(fees.storageLimit)", amount: content.amount, destination: content.destination, parameters: content.parameters))
+        case let .reveal(content):
+            return Tezos.Operation.reveal(Tezos.Operation.Reveal(source: content.source, fee: "\(fees.fee)", counter: content.counter, gasLimit: "\(fees.gasLimit)", storageLimit: "\(fees.storageLimit)", publicKey: content.publicKey))
+        case let .origination(content):
+            return Tezos.Operation.origination(Tezos.Operation.Origination(source: content.source, fee: "\(fees.fee)", counter: content.counter, gasLimit: "\(fees.gasLimit)", storageLimit: "\(fees.storageLimit)", balance: content.balance, delegate: content.delegate, script: content.script))
+        case let .delegation(content):
+            return Tezos.Operation.delegation(Tezos.Operation.Delegation(source: content.source, fee: "\(fees.fee)", counter: content.counter, gasLimit: "\(fees.gasLimit)", storageLimit: "\(fees.storageLimit)", delegate: content.delegate))
+        default :
+            return operation
         }
     }
+}
+
+public enum TezosTransactionType {
+    case XTZ
+    case FA1_2
+    case FA2
+    case DAPP
 }

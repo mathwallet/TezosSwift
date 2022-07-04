@@ -6,13 +6,14 @@
 //
 
 import Foundation
+import BeaconBlockchainTezos
 
-public struct SimulateFeeOperation:TezosOperation {
+public struct SimulateFeeOperation {
     var branch:String
     var signature = "edsigtkpiSSschcaCt9pUVrpNPf7TTcgvgDEDD6NCEHMy8NNQJCGnMfLZzYoQj74yLjo9wx6MPVV29CvVzgi7qEcEUok3k7AuMg"
-    var operation:TezosBaseOperation
+    var operation:Tezos.Operation
     var chain_id:String
-    init(operation:TezosBaseOperation,metadata:TezosBlockchainMetadata) {
+    init(operation:Tezos.Operation,metadata:TezosBlockchainMetadata) {
         self.branch = metadata.blockHash
         self.chain_id = metadata.chainId!
         self.operation = operation
@@ -24,7 +25,7 @@ public struct SimulateFeeOperation:TezosOperation {
             "operation":[
                 "branch":"",
                 "contents":[
-                    operation.payload()
+//                    operation.payload()
                 ],
                 "signature":signature
             ]

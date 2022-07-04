@@ -8,6 +8,7 @@
 import Foundation
 import Alamofire
 import CryptoSwift
+import BeaconBlockchainTezos
 
 public struct TezosRpcProvider {
     
@@ -278,10 +279,16 @@ extension  TezosRpcProvider {
 
 // MARK: transaction Base
 extension  TezosRpcProvider {
-    public func forge(branch:String,operation:TezosBaseOperation,successBlock:@escaping (_ forgeResult:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
+    public func forge(branch:String,operation:Tezos.Operation,successBlock:@escaping (_ forgeResult:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
+        guard let operationPayload = TezosOperationUtil.operationPayload(operation: operation) else {
+            failure(TezosRpcProviderError.server(message: "wrong data"))
+            return
+        }
         self.getHeadHash { headHash in
             let p:Parameters = ["branch":branch,
-                                "contents": [operation.payload()]
+                                "contents": [
+                                    operationPayload
+                                            ]
             ]
             self.POST(rpcURL: ForgeURL(nodeUrl: self.nodeUrl, headHash: headHash), parameters: p) { data in
                 do {
@@ -330,12 +337,18 @@ extension  TezosRpcProvider {
 // MARK: Pretreatment transaction
 extension  TezosRpcProvider {
     
-    public func getSimulationResponse(metadata:TezosBlockchainMetadata,operation:TezosBaseOperation,successBlock:@escaping (_ response:SimulationResponse)-> Void,failure:@escaping (_ error:Error)-> Void) {
+    public func getSimulationResponse(metadata:TezosBlockchainMetadata,operation:Tezos.Operation,successBlock:@escaping (_ response:SimulationResponse)-> Void,failure:@escaping (_ error:Error)-> Void) {
+        guard let operationPayload = TezosOperationUtil.operationPayload(operation: operation) else {
+            failure(TezosRpcProviderError.server(message: "wrong data"))
+            return
+        }
         let p:Parameters = [
             "operation":[
                 "branch":metadata.blockHash,
                 "signature":"edsigtkpiSSschcaCt9pUVrpNPf7TTcgvgDEDD6NCEHMy8NNQJCGnMfLZzYoQj74yLjo9wx6MPVV29CvVzgi7qEcEUok3k7AuMg",
-                "contents":[operation.payload()]
+                "contents":[
+                    operationPayload
+                ]
             ],
             "chain_id":metadata.chainId ?? "NetXdQprcVkpaWU"
         ]

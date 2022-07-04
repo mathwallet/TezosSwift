@@ -20,6 +20,15 @@
         }
       },
       {
+        "package": "BeaconSDK",
+        "repositoryURL": "https://github.com/airgap-it/beacon-ios-sdk.git",
+        "state": {
+          "branch": null,
+          "revision": "8988fc9563a9dc3cdb15d1878f949bf6c9bcfb46",
+          "version": "3.1.2"
+        }
+      },
+      {
         "package": "BigInt",
         "repositoryURL": "https://github.com/attaswift/BigInt.git",
         "state": {
