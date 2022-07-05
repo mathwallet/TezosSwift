@@ -355,9 +355,12 @@ extension  TezosRpcProvider {
         self.POST(rpcURL: RunOperationURL(nodeUrl: self.nodeUrl), parameters: p) { data in
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
-                let dic = json as? [String:Any]
+                guard let dic = json as? [String:Any] else {
+                    failure(TezosRpcProviderError.server(message: "error data"))
+                    return
+                }
                 let parser = TezosSimulationResponseParser(constants: metadata.constants)
-                let responseResult = parser.parseSimulation(jsonDic: dic!)
+                let responseResult = parser.parseSimulation(jsonDic: dic)
                 successBlock(responseResult)
             } catch let e{
                 failure(e)
