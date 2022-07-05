@@ -9,7 +9,7 @@ import Foundation
 
 public struct TezosFeeEstimatorService {
     public func getForgedOperationsSize(forgeResult:String) -> Int {
-        return forgeResult.count + 64
+        return forgeResult.count/2 + 64
     }
     
     public func calculateFees(response:SimulationResponse,operationSize:Int) -> CalculatedFees {

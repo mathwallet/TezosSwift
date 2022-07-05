@@ -355,7 +355,7 @@ extension  TezosRpcProvider {
         self.POST(rpcURL: RunOperationURL(nodeUrl: self.nodeUrl), parameters: p) { data in
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
-                let dic = json as! [String:Any]
+                let dic = json as? [String:Any]
                 let parser = TezosSimulationResponseParser(constants: metadata.constants)
                 let responseResult = parser.parseSimulation(jsonDic: dic)
                 successBlock(responseResult)
