@@ -37,7 +37,7 @@ public struct TezosOperationUtil {
     }
     
     static func fa2Parameters(from:String,to:String,amount:String,tokenId:String) -> Tezos.Operation.Parameters {
-        let amountArgs:[Micheline.MichelsonV1Expression] = [TezosArg.literal(Micheline.Literal.string(tokenId)),TezosArg.literal(Micheline.Literal.int(amount))]
+        let amountArgs:[Micheline.MichelsonV1Expression] = [TezosArg.literal(Micheline.Literal.int(tokenId)),TezosArg.literal(Micheline.Literal.int(amount))]
         let amountPrim = TezosPrim(prim: "Pair", args: amountArgs)
         
         let toArgs = [TezosArg.literal(Micheline.Literal.string(to)),TezosArg.prim(amountPrim)]
