@@ -115,6 +115,37 @@ public class TezosTransaction {
             return operation
         }
     }
+    
+    public func transactionKind() -> String {
+        if let operation = self.operations.first {
+            switch operation {
+            case let .transaction(content):
+                return content.kind.rawValue
+            case let .endorsement(content):
+                return content.kind.rawValue
+            case let .seedNonceRevelation(content):
+                return content.kind.rawValue
+            case let .doubleEndorsementEvidence(content):
+                return content.kind.rawValue
+            case let .doubleBakingEvidence(content):
+                return content.kind.rawValue
+            case let .activateAccount(content):
+                return content.kind.rawValue
+            case let .proposals(content):
+                return content.kind.rawValue
+            case let .ballot(content):
+                return content.kind.rawValue
+            case let .reveal(content):
+                return content.kind.rawValue
+            case let .origination(content):
+                return content.kind.rawValue
+            case let .delegation(content):
+                return content.kind.rawValue
+            }
+        } else {
+            return ""
+        }
+    }
 }
 
 public enum TezosTransactionType {
