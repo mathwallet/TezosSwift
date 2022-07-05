@@ -46,7 +46,7 @@ public struct TezosOperationUtil {
         let fromArgs = [TezosArg.literal(Micheline.Literal.string(from)),TezosArg.sequence([TezosArg.prim(toPrim)])]
         let valuePrim = TezosPrim(prim: "Pair", args:fromArgs)
         
-        return TezosParameters(entrypoint: TezosParameters.Entrypoint.custom("transfer"), value: TezosArg.prim(valuePrim))
+        return TezosParameters(entrypoint: TezosParameters.Entrypoint.custom("transfer"), value: TezosArg.sequence([TezosArg.prim(valuePrim)]))
         
     }
     
