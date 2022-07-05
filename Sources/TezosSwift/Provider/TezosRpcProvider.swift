@@ -357,7 +357,7 @@ extension  TezosRpcProvider {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
                 let dic = json as? [String:Any]
                 let parser = TezosSimulationResponseParser(constants: metadata.constants)
-                let responseResult = parser.parseSimulation(jsonDic: dic)
+                let responseResult = parser.parseSimulation(jsonDic: dic!)
                 successBlock(responseResult)
             } catch let e{
                 failure(e)
