@@ -75,7 +75,7 @@ public struct TezosRpcProvider {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
                 let dic = json as! [String:Any]
                 guard let dataArray = dic["data"] as? Array<[String:Any]>, let dataResult = dataArray.first, let args = dataResult["args"] as? Array<[String:Any]>, let balance = args[1]["int"] as? String else {
-                    failure(TezosRpcProviderError.server(message: "data error"))
+                    failure(TezosRpcProviderError.server(message: "error data"))
                     return
                 }
                 successBlock(balance)
@@ -136,7 +136,7 @@ extension  TezosRpcProvider {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
                 let dic = json as! [String:Any]
                 guard let height = dic["level"] as? Int else {
-                    failure(TezosRpcProviderError.server(message: "数据错误"))
+                    failure(TezosRpcProviderError.unknown)
                     return
                 }
                 successBlock(height)
@@ -281,7 +281,7 @@ extension  TezosRpcProvider {
 extension  TezosRpcProvider {
     public func forge(branch:String,operation:Tezos.Operation,successBlock:@escaping (_ forgeResult:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
         guard let operationPayload = TezosOperationUtil.operationPayload(operation: operation) else {
-            failure(TezosRpcProviderError.server(message: "wrong data"))
+            failure(TezosRpcProviderError.server(message: "forge error"))
             return
         }
         self.getHeadHash { headHash in
@@ -339,7 +339,7 @@ extension  TezosRpcProvider {
     
     public func getSimulationResponse(metadata:TezosBlockchainMetadata,operation:Tezos.Operation,successBlock:@escaping (_ response:SimulationResponse)-> Void,failure:@escaping (_ error:Error)-> Void) {
         guard let operationPayload = TezosOperationUtil.operationPayload(operation: operation) else {
-            failure(TezosRpcProviderError.server(message: "wrong data"))
+            failure(TezosRpcProviderError.server(message: "error data"))
             return
         }
         let p:Parameters = [
