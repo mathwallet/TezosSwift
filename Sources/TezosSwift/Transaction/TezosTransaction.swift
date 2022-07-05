@@ -62,7 +62,7 @@ public class TezosTransaction {
     
     public convenience init(nodeUrl:String,operation:Tezos.Operation,metadata:TezosBlockchainMetadata) {
         self.init(nodeUrl: nodeUrl, metadata: metadata)
-        self.operations.append(operation)
+        self.addOperation(operation: operation)
     }
     
     func signHexString(keypair:TezosKeypair,hexString:String) -> Data? {
