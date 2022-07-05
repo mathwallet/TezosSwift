@@ -51,10 +51,13 @@ public struct TezosOperationUtil {
     }
     
     static func operationPayload(operation:Tezos.Operation) -> [String:Any]? {
-        guard let data = try? JSONEncoder().encode(operation),let result = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String : Any] else {
+        guard let data = try? JSONEncoder().encode(operation),var result = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String : Any],var parameters = result["parameters"] as? [Any] ,let entrypoint = parameters["entrypoint"] else {
             return nil
         }
-        print(String(data: data, encoding: .utf8))
+        parameters.insert(entrypoint, at: 0)
+        parameters.remove(at: 3)
+        result.removeValue(forKey: "parameters")
+        result.append(forKey: "parameters", element: parameters)
         return result
     }
 }
