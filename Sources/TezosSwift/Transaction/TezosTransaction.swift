@@ -21,11 +21,16 @@ public class TezosTransaction {
         return self.metadata.counter
     }
     
+    public var kind:String {
+        return self.transactionKind()
+    }
+    
     public var operationDictionary:[String:Any]?
     
     public var sendString:String?
     public var contents = [[String:Any]]()
     public var operations = [Tezos.Operation]()
+    
     
     var signature = ""
     var metadata:TezosBlockchainMetadata
@@ -116,7 +121,7 @@ public class TezosTransaction {
         }
     }
     
-    public func transactionKind() -> String {
+    func transactionKind() -> String {
         if let operation = self.operations.first {
             switch operation {
             case let .transaction(content):
