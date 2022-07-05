@@ -15,7 +15,7 @@ typealias TezosParameters = Tezos.Operation.Parameters
 
 public struct TezosOperationUtil {
     
-    static func createDappOperation(operation:Tezos.Operation,from:String,to:String,metadata:TezosBlockchainMetadata)  -> Tezos.Operation {
+    static func createDappOperation(operation:Tezos.Operation,from:String,metadata:TezosBlockchainMetadata)  -> Tezos.Operation {
         switch operation {
         case let .transaction(content):
             return .transaction(Tezos.Operation.Transaction(source: from, fee: "0", counter: "\(metadata.counter)", gasLimit: MAXGAS, storageLimit: content.storageLimit, amount: content.amount, destination: content.destination, parameters: content.parameters))
