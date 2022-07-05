@@ -43,7 +43,7 @@ public struct TezosOperationUtil {
         let toArgs = [TezosArg.literal(Micheline.Literal.string(to)),TezosArg.prim(amountPrim)]
         let toPrim = TezosPrim(prim: "Pair", args:toArgs)
         
-        let fromArgs = [TezosArg.literal(Micheline.Literal.string(from)),TezosArg.prim(toPrim)]
+        let fromArgs = [TezosArg.literal(Micheline.Literal.string(from)),TezosArg.sequence([TezosArg.prim(toPrim)])]
         let valuePrim = TezosPrim(prim: "Pair", args:fromArgs)
         
         return TezosParameters(entrypoint: TezosParameters.Entrypoint.custom("transfer"), value: TezosArg.prim(valuePrim))
@@ -51,10 +51,9 @@ public struct TezosOperationUtil {
     }
     
     static func operationPayload(operation:Tezos.Operation) -> [String:Any]? {
-        guard let data = try? JSONEncoder().encode(operation),var result = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String : Any],var parameters = result["parameters"] as? [String:Any] else {
+        guard let data = try? JSONEncoder().encode(operation),let result = try? JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String : Any] else {
             return nil
         }
-        parameters.keys.sorted {($0.count > $1.count)}
         return result
     }
 }
