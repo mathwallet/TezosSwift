@@ -360,7 +360,10 @@ extension  TezosRpcProvider {
                     return
                 }
                 let parser = TezosSimulationResponseParser(constants: metadata.constants)
-                let responseResult = parser.parseSimulation(jsonDic: dic)
+                guard let responseResult = parser.parseSimulation(jsonDic: dic) else {
+                    failure(TezosRpcProviderError.server(message: "error data"))
+                    return
+                }
                 successBlock(responseResult)
             } catch let e{
                 failure(e)
