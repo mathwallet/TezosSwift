@@ -7,7 +7,6 @@
 
 import Foundation
 
-// MARK: transation
 public struct SimulationResponse {
     public var simulations:[SimulatedFees]
 }
