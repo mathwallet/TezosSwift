@@ -15,7 +15,6 @@ public struct FeesOperation {
     var storageLimit:Int
     var extrafees = ExtraFees()
     public static func + (op1:FeesOperation,op2:FeesOperation) -> FeesOperation {
-        let newExtrafees = op1.extrafees + op2.extrafees
         return FeesOperation(fee: op1.fee+op2.fee, gasLimit: op1.gasLimit+op2.gasLimit, storageLimit: op1.storageLimit+op2.storageLimit,extrafees:op1.extrafees + op2.extrafees)
     }
 }
