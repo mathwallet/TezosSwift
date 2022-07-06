@@ -26,8 +26,16 @@ public struct FeesOperation {
     }
 }
 
-public struct CalculatedFees{
-    let operationsFees: [FeesOperation]
+public struct CalculatedFees:FeesOperation{
+    let operationFees: [FeesOperation]
     let accumulatedFee: FeesOperation
+    
+    var calculateAccumulated:FeesOperation {
+        var accumulatedFees = FeesOperation(fee: 0, gasLimit: 0, storageLimit: 0)
+        operationFees.forEach { feesOperation in
+            accumulatedFees = accumulatedFees + feesOperation
+        }
+        return accumulatedFees
+    }
 }
 

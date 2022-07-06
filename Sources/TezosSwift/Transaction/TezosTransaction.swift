@@ -94,7 +94,7 @@ public class TezosTransaction {
                 let service = TezosFeeEstimatorService()
                 self.provider.forge(branch:self.metadata.blockHash ,operation: operation) { forgeResult in
                     let fee = service.calculateFees(response: response, operationSize: service.getForgedOperationsSize(forgeResult: forgeResult))
-                    let haveFeeOperation =  self.createOperation(operation: operation,fees:fee.accumulatedFee)
+                    let haveFeeOperation =  self.createOperation(operation: operation,fees:fee)
                      successBlock(haveFeeOperation)
                 } failure: { error in
                     failure(error)

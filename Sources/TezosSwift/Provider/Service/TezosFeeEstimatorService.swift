@@ -12,7 +12,7 @@ public struct TezosFeeEstimatorService {
         return forgeResult.count/2 + 64
     }
     
-    public func calculateFees(response:SimulationResponse,operationSize:Int) -> CalculatedFees {
+    public func calculateFees(response:SimulationResponse,operationSize:Int) -> FeesOperation {
         var listOfFees = [FeesOperation]()
         var accumulatedFee = FeesOperation(fee: 0, gasLimit: 0, storageLimit: 0,extrafees: [ExtraFee(fee: 0)])
         response.simulations.forEach { simulatedFee in
@@ -21,7 +21,7 @@ public struct TezosFeeEstimatorService {
             listOfFees.append(operationFee)
         }
         
-        return CalculatedFees(operationsFees: listOfFees, accumulatedFee: accumulatedFee)
+        return CalculatedFees(operationsFees: listOfFees, accumulatedFee: accumulatedFee).calculateAccumulated
     }
     
     private func calculateOperationFees(

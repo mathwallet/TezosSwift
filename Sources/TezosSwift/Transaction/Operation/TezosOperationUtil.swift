@@ -18,7 +18,7 @@ public struct TezosOperationUtil {
     static func createDappOperation(operation:Tezos.Operation,from:String,metadata:TezosBlockchainMetadata)  -> Tezos.Operation {
         switch operation {
         case let .transaction(content):
-            return .transaction(Tezos.Operation.Transaction(source: from, fee: "0", counter: "\(metadata.counter)", gasLimit: metadata.constants.hard_gas_limit_per_operation, storageLimit: content.storageLimit, amount: content.amount, destination: content.destination, parameters: content.parameters))
+            return .transaction(Tezos.Operation.Transaction(source: from, fee: "0", counter: "\(metadata.counter)", gasLimit: MAXGAS, storageLimit: content.storageLimit, amount: content.amount, destination: content.destination, parameters: content.parameters))
         case let .endorsement(content):
             return .endorsement(Tezos.Operation.Endorsement(level: content.level))
         case let .seedNonceRevelation(content):
@@ -36,9 +36,9 @@ public struct TezosOperationUtil {
         case let .reveal(content):
             return .reveal(Tezos.Operation.Reveal(source: from, fee: "0", counter: "\(metadata.counter)", gasLimit: MAXGAS, storageLimit: content.storageLimit, publicKey: content.publicKey))
         case let .origination(content):
-            return .origination(Tezos.Operation.Origination(source: from, fee: "0", counter: "\(metadata.counter)", gasLimit: metadata.constants.hard_gas_limit_per_operation, storageLimit: content.storageLimit, balance: content.balance, delegate: content.delegate, script: content.script))
+            return .origination(Tezos.Operation.Origination(source: from, fee: "0", counter: "\(metadata.counter)", gasLimit: MAXGAS, storageLimit: content.storageLimit, balance: content.balance, delegate: content.delegate, script: content.script))
         case let .delegation(content):
-            return .delegation(Tezos.Operation.Delegation(source: from, fee: "0", counter: "\(metadata.counter)", gasLimit: metadata.constants.hard_gas_limit_per_operation, storageLimit: content.storageLimit, delegate: content.delegate))
+            return .delegation(Tezos.Operation.Delegation(source: from, fee: "0", counter: "\(metadata.counter)", gasLimit: MAXGAS, storageLimit: content.storageLimit, delegate: content.delegate))
         }
     }
     
