@@ -75,7 +75,7 @@ public struct TezosRpcProvider {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
                 let dic = json as! [String:Any]
                 guard let dataArray = dic["data"] as? Array<[String:Any]>, let dataResult = dataArray.first, let args = dataResult["args"] as? Array<[String:Any]>, let balance = args[1]["int"] as? String else {
-                    failure(TezosRpcProviderError.server(message: "error data"))
+                    failure(TezosRpcProviderError.server(message: "Failed to get balance"))
                     return
                 }
                 successBlock(balance)
@@ -277,7 +277,7 @@ extension  TezosRpcProvider {
     
     public func getSimulationResponse(metadata:TezosBlockchainMetadata,operation:Tezos.Operation,successBlock:@escaping (_ response:SimulationResponse)-> Void,failure:@escaping (_ error:Error)-> Void) {
         guard let operationPayload = TezosOperationUtil.operationPayload(operation: operation) else {
-            failure(TezosRpcProviderError.server(message: "error data"))
+            failure(TezosRpcProviderError.server(message: "Operation error"))
             return
         }
         let p:Parameters = [
@@ -294,12 +294,12 @@ extension  TezosRpcProvider {
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
                 guard let dic = json as? [String:Any] else {
-                    failure(TezosRpcProviderError.server(message: "error data"))
+                    failure(TezosRpcProviderError.server(message: "Parameter error"))
                     return
                 }
                 let parser = TezosSimulationResponseParser(constants: metadata.constants)
                 guard let responseResult = parser.parseSimulation(jsonDic: dic) else {
-                    failure(TezosRpcProviderError.server(message: "error data"))
+                    failure(TezosRpcProviderError.server(message: "Data error"))
                     return
                 }
                 successBlock(responseResult)
