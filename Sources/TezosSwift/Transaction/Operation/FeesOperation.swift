@@ -26,7 +26,7 @@ public struct FeesOperation {
     }
 }
 
-public struct CalculatedFees:FeesOperation{
+public struct CalculatedFees{
     let operationFees: [FeesOperation]
     let accumulatedFee: FeesOperation
     

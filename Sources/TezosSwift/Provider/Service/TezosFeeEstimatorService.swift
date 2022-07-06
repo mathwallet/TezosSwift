@@ -21,7 +21,7 @@ public struct TezosFeeEstimatorService {
             listOfFees.append(operationFee)
         }
         
-        return CalculatedFees(operationsFees: listOfFees, accumulatedFee: accumulatedFee).calculateAccumulated
+        return CalculatedFees(operationFees: listOfFees, accumulatedFee: accumulatedFee).calculateAccumulated
     }
     
     private func calculateOperationFees(
