@@ -8,6 +8,7 @@
 import Foundation
 import Alamofire
 import CryptoSwift
+import BeaconBlockchainTezos
 
 public struct TezosRpcProvider {
     
@@ -72,9 +73,9 @@ public struct TezosRpcProvider {
         self.POST(rpcURL: RunViewURL(nodeUrl: self.nodeUrl), parameters: p) { data in
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
-                let dic = json as! Dictionary<String,Any>
-                guard let dataArray = dic["data"] as? Array<Dictionary<String,Any>>, let dataResult = dataArray.first, let args = dataResult["args"] as? Array<Dictionary<String,Any>>, let balance = args[1]["int"] as? String else {
-                    failure(TezosRpcProviderError.server(message: "data error"))
+                let dic = json as! [String:Any]
+                guard let dataArray = dic["data"] as? Array<[String:Any]>, let dataResult = dataArray.first, let args = dataResult["args"] as? Array<[String:Any]>, let balance = args[1]["int"] as? String else {
+                    failure(TezosRpcProviderError.server(message: "error data"))
                     return
                 }
                 successBlock(balance)
@@ -133,9 +134,9 @@ extension  TezosRpcProvider {
         self.GET(rpcURL:GetHeadHeader(nodeUrl: nodeUrl)) { data in
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
-                let dic = json as! Dictionary<String,Any>
+                let dic = json as! [String:Any]
                 guard let height = dic["level"] as? Int else {
-                    failure(TezosRpcProviderError.server(message: "数据错误"))
+                    failure(TezosRpcProviderError.unknown)
                     return
                 }
                 successBlock(height)
@@ -278,10 +279,16 @@ extension  TezosRpcProvider {
 
 // MARK: transaction Base
 extension  TezosRpcProvider {
-    public func forge(branch:String,operation:TezosBaseOperation,successBlock:@escaping (_ forgeResult:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
+    public func forge(branch:String,operation:Tezos.Operation,successBlock:@escaping (_ forgeResult:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
+        guard let operationPayload = TezosOperationUtil.operationPayload(operation: operation) else {
+            failure(TezosRpcProviderError.server(message: "forge error"))
+            return
+        }
         self.getHeadHash { headHash in
             let p:Parameters = ["branch":branch,
-                                "contents": [operation.payload()]
+                                "contents": [
+                                    operationPayload
+                                            ]
             ]
             self.POST(rpcURL: ForgeURL(nodeUrl: self.nodeUrl, headHash: headHash), parameters: p) { data in
                 do {
@@ -298,11 +305,11 @@ extension  TezosRpcProvider {
         }
     }
     
-    public func preapplyOperation(operationDictionary:Dictionary<String,Any>,branch:String,successBlock:@escaping (_ isSuccess:Bool)-> Void,failure:@escaping (_ error:Error)-> Void) {
+    public func preapplyOperation(operationDictionary:[String:Any],branch:String,successBlock:@escaping (_ isSuccess:Bool)-> Void,failure:@escaping (_ error:Error)-> Void) {
         self.POST(rpcURL: PreapplyOperationURL(nodeUrl: self.nodeUrl, branch: branch),encoding: ArrayEncoding.default, parameters: [operationDictionary].asParameters()) { data in
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
-                let jsonArray = json as! Array<Dictionary<String,Any>>
+                let jsonArray = json as! Array<[String:Any]>
                 let isSuccess = TezosPreapplyResponseParser.parse(jsonArray: jsonArray)
                 successBlock(isSuccess)
             } catch let e{
@@ -330,21 +337,33 @@ extension  TezosRpcProvider {
 // MARK: Pretreatment transaction
 extension  TezosRpcProvider {
     
-    public func getSimulationResponse(metadata:TezosBlockchainMetadata,operation:TezosBaseOperation,successBlock:@escaping (_ response:SimulationResponse)-> Void,failure:@escaping (_ error:Error)-> Void) {
+    public func getSimulationResponse(metadata:TezosBlockchainMetadata,operation:Tezos.Operation,successBlock:@escaping (_ response:SimulationResponse)-> Void,failure:@escaping (_ error:Error)-> Void) {
+        guard let operationPayload = TezosOperationUtil.operationPayload(operation: operation) else {
+            failure(TezosRpcProviderError.server(message: "error data"))
+            return
+        }
         let p:Parameters = [
             "operation":[
                 "branch":metadata.blockHash,
                 "signature":"edsigtkpiSSschcaCt9pUVrpNPf7TTcgvgDEDD6NCEHMy8NNQJCGnMfLZzYoQj74yLjo9wx6MPVV29CvVzgi7qEcEUok3k7AuMg",
-                "contents":[operation.payload()]
+                "contents":[
+                    operationPayload
+                ]
             ],
             "chain_id":metadata.chainId ?? "NetXdQprcVkpaWU"
         ]
         self.POST(rpcURL: RunOperationURL(nodeUrl: self.nodeUrl), parameters: p) { data in
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
-                let dic = json as! Dictionary<String,Any>
+                guard let dic = json as? [String:Any] else {
+                    failure(TezosRpcProviderError.server(message: "error data"))
+                    return
+                }
                 let parser = TezosSimulationResponseParser(constants: metadata.constants)
-                let responseResult = parser.parseSimulation(jsonDic: dic)
+                guard let responseResult = parser.parseSimulation(jsonDic: dic) else {
+                    failure(TezosRpcProviderError.server(message: "error data"))
+                    return
+                }
                 successBlock(responseResult)
             } catch let e{
                 failure(e)
