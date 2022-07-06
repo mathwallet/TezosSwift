@@ -70,9 +70,11 @@ public struct TezosSimulationResponseParser {
     }
     
     private func parseInternalOperationResult(internalResult:[String:Any]) -> InternalOperationResult? {
-        if let result  = internalResult["result"] as? [String:Any],let internalConsumedGasStr = result["consumed_gas"] as? String,let internalConsumedStorageStr = result["paid_storage_size_diff"] as? String {
-            let internalConsumedGas = Int(internalConsumedGasStr) ?? 0
-            let internalConsumedStorage = Int(internalConsumedStorageStr) ?? 0
+        if let result  = internalResult["result"] as? [String:Any] {
+            let internalConsumedGasStr = result["consumed_gas"] as? String
+            let internalConsumedStorageStr = result["paid_storage_size_diff"] as? String
+            let internalConsumedGas = Int(internalConsumedGasStr ?? "0") ?? 0
+            let internalConsumedStorage = Int(internalConsumedStorageStr ?? "0") ?? 0
             var extraFees = ExtraFees()
             if let allocationFee = parseAllocationFee(results: result) {
                 extraFees.add(extraFee: allocationFee)
