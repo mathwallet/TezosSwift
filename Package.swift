@@ -17,7 +17,7 @@ let package = Package(
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         .package(url: "https://github.com/Alamofire/Alamofire.git", from: "5.4.3"),
-        .package(name: "Base58Swift", url: "https://github.com/mathwallet/Base58Swift.git", branch: "master"),
+        .package(name: "Base58Swift", url: "https://github.com/mathwallet/Base58Swift.git", from: "3.0.0"),
         .package(name: "Sr25519", url: "https://github.com/lishuailibertine/Sr25519.swift.git", from: "0.1.6"),
         .package(name: "Sodium", url: "https://github.com/jedisct1/swift-sodium.git", from: "0.8.0"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.4.1"),
