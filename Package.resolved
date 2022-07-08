@@ -21,7 +21,7 @@
       },
       {
         "package": "BeaconSDK",
-        "repositoryURL": "https://github.com/airgap-it/beacon-ios-sdk.git",
+        "repositoryURL": "https://github.com/xueyuejie/beacon-ios-sdk",
         "state": {
           "branch": null,
           "revision": "8988fc9563a9dc3cdb15d1878f949bf6c9bcfb46",
