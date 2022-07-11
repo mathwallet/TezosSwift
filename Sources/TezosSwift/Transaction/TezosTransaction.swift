@@ -52,14 +52,14 @@ public class TezosTransaction {
         }
     }
     
-    public convenience init(nodeUrl:String,from:String,to:String,mint:String = "",amount:BigUInt,tokenType:TezosTransactionType,tokenId: String = "",metadata:TezosBlockchainMetadata) {
-        self.init(nodeUrl: nodeUrl, metadata: metadata)
+    public convenience init(from:String,to:String,mint:String = "",amount:BigUInt,tokenType:TezosTransactionType,tokenId: String = "",metadata:TezosBlockchainMetadata) {
+        self.init(metadata: metadata)
         let operation = TezosOperationUtil.createOperation(from: from, to: to,mint:mint, counter:"\(metadata.counter)" , amount: amount.description, tokenType: tokenType, tokenId: tokenId,metadata:metadata)
         self.addOperation(operation: operation)
     }
     
-    public convenience init(nodeUrl:String,from:String,operation:Tezos.Operation,metadata:TezosBlockchainMetadata) {
-        self.init(nodeUrl: nodeUrl, metadata: metadata)
+    public convenience init(from:String,operation:Tezos.Operation,metadata:TezosBlockchainMetadata) {
+        self.init(metadata: metadata)
         let operation = TezosOperationUtil.createDappOperation(operation: operation, from: from, metadata: metadata)
         self.addOperation(operation: operation)
     }
