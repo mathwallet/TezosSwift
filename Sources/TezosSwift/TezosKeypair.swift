@@ -112,7 +112,7 @@ extension TezosKeypair {
 // MARK: - Sign&Verify
 
 extension TezosKeypair {
-    public func signDigest(messageDigest:Data) -> Data? {
+    public func signDigest(messageDigest:Data) -> Data {
         return try! Ed25519KeyPair(raw:self.keyPair!.raw).sign(message: messageDigest).raw
     }
     
