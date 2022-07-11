@@ -36,9 +36,7 @@ public class TezosTransaction {
     var metadata:TezosBlockchainMetadata
     var forgeString:String?
     
-    let provider:TezosRpcProvider
     public init(nodeUrl:String,metadata:TezosBlockchainMetadata) {
-        self.provider = TezosRpcProvider(nodeUrl: nodeUrl)
         self.metadata = metadata
     }
     
