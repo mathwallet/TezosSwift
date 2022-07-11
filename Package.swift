@@ -22,7 +22,6 @@ let package = Package(
         .package(name: "Sodium", url: "https://github.com/jedisct1/swift-sodium.git", from: "0.8.0"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.4.1"),
         .package(name:"BIP39swift", url: "https://github.com/mathwallet/BIP39swift", from: "1.0.1"),
-        .package(name: "Secp256k1Swift", url: "https://github.com/mathwallet/Secp256k1Swift.git", from: "1.2.5"),
         .package(name: "BeaconSDK", url: "https://github.com/xueyuejie/beacon-ios-sdk.git", from: "3.1.3")
     ],
     targets: [
@@ -36,8 +35,6 @@ let package = Package(
                            "Sodium",
                            "CryptoSwift",
                            "BIP39swift",
-                           "Secp256k1Swift",
-                           .product(name: "BIP32Swift", package: "Secp256k1Swift"),
                            .product(name: "BeaconBlockchainTezos", package: "BeaconSDK"),
                            .product(name: "BeaconClientWallet", package: "BeaconSDK"),
                            .product(name: "BeaconTransportP2PMatrix", package: "BeaconSDK")]),
