@@ -36,7 +36,7 @@ public class TezosTransaction {
     var metadata:TezosBlockchainMetadata
     var forgeString:String?
     
-    public init(nodeUrl:String,metadata:TezosBlockchainMetadata) {
+    public init(metadata:TezosBlockchainMetadata) {
         self.metadata = metadata
     }
     
