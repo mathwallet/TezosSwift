@@ -315,29 +315,6 @@ extension  TezosRpcProvider {
 
 // MARK: transaction
 extension  TezosRpcProvider {
-    
-//    preapplyTransaction
-    public func preapplyTransaction(transaction:TezosTransaction,successBlock:@escaping (_ isSuccess:Bool)-> Void,failure:@escaping (_ error:Error)-> Void) {
-        transaction.operations.forEach { operation in
-            transaction.resetOperation()
-            // calculate fee
-            transaction.calculateFees(operation: operation) { haveFeeOperation in
-                // create actual trading operation
-                transaction.addOperation(operation: haveFeeOperation)
-                // forge transaction
-                self.forge(branch: transaction.branch, operation: haveFeeOperation) { forgeResult in
-                    transaction.forgeString = forgeResult
-                    successBlock(true)
-                } failure: { error in
-                    failure(error)
-                }
-            } failure: { error in
-                failure(error)
-            }
-        }
-    }
-    
-    
     public func forge(branch:String,operation:Tezos.Operation,successBlock:@escaping (_ forgeResult:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
         guard let operationPayload = TezosOperationUtil.operationPayload(operation: operation) else {
             failure(TezosRpcProviderError.server(message: "forge error"))
@@ -394,6 +371,47 @@ extension  TezosRpcProvider {
     
 }
 
+// MARK: preapplyTransaction
+extension TezosRpcProvider {
+    public func preapplyTransaction(transaction:TezosTransaction,successBlock:@escaping (_ isSuccess:Bool)-> Void,failure:@escaping (_ error:Error)-> Void) {
+        transaction.operations.forEach { operation in
+            transaction.resetOperation()
+            // calculate fee
+            self.calculateFees(operation: operation,metadata: transaction.metadata) { haveFeeOperation in
+                // create actual trading operation
+                transaction.addOperation(operation: haveFeeOperation)
+                // forge transaction
+                self.forge(branch: transaction.branch, operation: haveFeeOperation) { forgeResult in
+                    transaction.forgeString = forgeResult
+                    successBlock(true)
+                } failure: { error in
+                    failure(error)
+                }
+            } failure: { error in
+                failure(error)
+            }
+        }
+    }
+    
+    func calculateFees(operation:Tezos.Operation,metadata:TezosBlockchainMetadata,successBlock:@escaping (_ haveFeeOperation:Tezos.Operation)-> Void,failure:@escaping (_ error:Error)-> Void) {
+        switch operation{
+        case .transaction(_),.reveal(_),.origination(_),.delegation(_):
+            self.getSimulationResponse(metadata: metadata, operation: operation) { response in
+                let service = TezosFeeEstimatorService()
+                self.forge(branch:metadata.blockHash ,operation: operation) { forgeResult in
+                    let haveFeeOperation = service.calculateFeesAndCreatOperation(response: response, operation: operation, operationSize: service.getForgedOperationsSize(forgeResult: forgeResult))
+                    successBlock(haveFeeOperation)
+                } failure: { error in
+                    failure(error)
+                }
+            } failure: { error in
+                failure(error)
+            }
+        default:
+            successBlock(operation)
+        }
+    }
+}
 
 extension TezosRpcProvider {
     func GET(rpcURL:RPCURL,encoding: ParameterEncoding = JSONEncoding.default, successBlock:@escaping (_ data:Data)-> Void,failure:@escaping (_ error:Error)-> Void) {

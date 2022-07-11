@@ -87,41 +87,6 @@ public class TezosTransaction {
         }
     }
     
-    func calculateFees(operation:Tezos.Operation,successBlock:@escaping (_ haveFeeOperation:Tezos.Operation)-> Void,failure:@escaping (_ error:Error)-> Void) {
-        switch operation{
-        case .transaction(_),.reveal(_),.origination(_),.delegation(_):
-            provider.getSimulationResponse(metadata: self.metadata, operation: operation) { response in
-                let service = TezosFeeEstimatorService()
-                self.provider.forge(branch:self.metadata.blockHash ,operation: operation) { forgeResult in
-                    let fee = service.calculateFees(response: response, operationSize: service.getForgedOperationsSize(forgeResult: forgeResult))
-                    let haveFeeOperation =  self.createOperation(operation: operation,fees:fee)
-                     successBlock(haveFeeOperation)
-                } failure: { error in
-                    failure(error)
-                }
-            } failure: { error in
-                failure(error)
-            }
-        default:
-            successBlock(operation)
-        }
-    }
-        
-    public func createOperation(operation:Tezos.Operation,fees: FeesOperation) -> Tezos.Operation {
-        switch operation {
-        case let .transaction(content):
-            return Tezos.Operation.transaction(Tezos.Operation.Transaction(source:content.source , fee:"\(fees.fee)" , counter: content.counter, gasLimit: "\(fees.gasLimit)", storageLimit: "\(fees.storageLimit)", amount: content.amount, destination: content.destination, parameters: content.parameters))
-        case let .reveal(content):
-            return Tezos.Operation.reveal(Tezos.Operation.Reveal(source: content.source, fee: "\(fees.fee)", counter: content.counter, gasLimit: "\(fees.gasLimit)", storageLimit: "\(fees.storageLimit)", publicKey: content.publicKey))
-        case let .origination(content):
-            return Tezos.Operation.origination(Tezos.Operation.Origination(source: content.source, fee: "\(fees.fee)", counter: content.counter, gasLimit: "\(fees.gasLimit)", storageLimit: "\(fees.storageLimit)", balance: content.balance, delegate: content.delegate, script: content.script))
-        case let .delegation(content):
-            return Tezos.Operation.delegation(Tezos.Operation.Delegation(source: content.source, fee: "\(fees.fee)", counter: content.counter, gasLimit: "\(fees.gasLimit)", storageLimit: "\(fees.storageLimit)", delegate: content.delegate))
-        default :
-            return operation
-        }
-    }
-    
     func transactionKind() -> String {
         if let operation = self.operations.first {
             switch operation {
