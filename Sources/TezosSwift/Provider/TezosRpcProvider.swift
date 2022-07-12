@@ -20,6 +20,7 @@ public struct TezosRpcProvider {
     public func getXTZBalance(address:String,successBlock:@escaping (_ balance:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
         self.GET(rpcURL: GetBalanceURL(nodeUrl: self.nodeUrl, address: address)) { data in
             do {
+                let resultString = String(data: data, encoding: .utf8)
                 let string = try JSONDecoder().decode(String.self, from: data)
                 successBlock(string)
             } catch let e {
@@ -107,6 +108,7 @@ extension  TezosRpcProvider {
     public func getChainID(successBlock:@escaping (_ chainID:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
         self.GET(rpcURL:GetChainIDURL(nodeUrl: nodeUrl)) { data in
             do {
+                let resultString = String(data: data, encoding: .utf8)
                 let string = try JSONDecoder().decode(String.self, from: data)
                 successBlock(string)
             } catch let e {
@@ -120,6 +122,7 @@ extension  TezosRpcProvider {
     public func getHeadHash(successBlock:@escaping (_ headHash:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
         self.GET(rpcURL:GetHeadHashURL(nodeUrl: nodeUrl)) { data in
             do {
+                let resultString = String(data: data, encoding: .utf8)
                 let string = try JSONDecoder().decode(String.self, from: data)
                 successBlock(string)
             } catch let e {
@@ -152,6 +155,7 @@ extension  TezosRpcProvider {
     public func getNetworkConstants(successBlock:@escaping (_ contents:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
         self.GET(rpcURL:GetNetworkConstantsURL(nodeUrl: nodeUrl)) { data in
             do {
+                let resultString = String(data: data, encoding: .utf8)
                 let string = try JSONDecoder().decode(String.self, from: data)
                 successBlock(string)
             } catch let e {
@@ -165,6 +169,7 @@ extension  TezosRpcProvider {
     public func getManagerKey(address:String,successBlock:@escaping (_ managerKey:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
         self.GET(rpcURL:GetManagerKeyURL(nodeUrl: nodeUrl,address: address)) { data in
             do {
+                let resultString = String(data: data, encoding: .utf8)
                 let string = try JSONDecoder().decode(String.self, from: data)
                 successBlock(string)
             } catch let e {
@@ -178,6 +183,7 @@ extension  TezosRpcProvider {
     public func getCounter(address:String,successBlock:@escaping (_ counter:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
         self.GET(rpcURL:GetCounterURL(nodeUrl: nodeUrl,address: address)) { data in
             do {
+                let resultString = String(data: data, encoding: .utf8)
                 let string = try JSONDecoder().decode(String.self, from: data)
                 successBlock(string)
             } catch let e {
@@ -328,6 +334,7 @@ extension  TezosRpcProvider {
             ]
             self.POST(rpcURL: ForgeURL(nodeUrl: self.nodeUrl, headHash: headHash), parameters: p) { data in
                 do {
+                    let resultString = String(data: data, encoding: .utf8)
                     let result = try JSONDecoder().decode(String.self, from:data)
                     successBlock(result)
                 } catch let e{
@@ -342,7 +349,7 @@ extension  TezosRpcProvider {
     }
     
     public func preapplyOperation(operationDictionary:[String:Any],branch:String,successBlock:@escaping (_ isSuccess:Bool)-> Void,failure:@escaping (_ error:Error)-> Void) {
-        self.POST(rpcURL: PreapplyOperationURL(nodeUrl: self.nodeUrl, branch: branch),encoding: ArrayEncoding.default, parameters: [operationDictionary].asParameters()) { data in
+        self.POST(rpcURL: PreapplyOperationURL(nodeUrl: self.nodeUrl, branch: branch),encoding: JSONParameterEncoder.default, parameters: [operationDictionary].asParameters()) { data in
             do {
                 let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
                 let jsonArray = json as! Array<[String:Any]>
@@ -357,8 +364,9 @@ extension  TezosRpcProvider {
     }
     
     public func injectOperation(signedString:String,successBlock:@escaping (_ resultString:String)-> Void,failure:@escaping (_ error:Error)-> Void) {
-        self.POST(rpcURL:InjectOperationURL(nodeUrl: self.nodeUrl),encoding: StringEncoding.default, parameters: signedString.asParameters()) { data in
+        self.POST(rpcURL:InjectOperationURL(nodeUrl: self.nodeUrl),encoding: JSONParameterEncoder.default, parameters: signedString.asParameters()) { data in
             do {
+                let resultString = String(data: data, encoding: .utf8)
                 let result = try JSONDecoder().decode(String.self, from:data)
                 successBlock(result)
             } catch let e{
