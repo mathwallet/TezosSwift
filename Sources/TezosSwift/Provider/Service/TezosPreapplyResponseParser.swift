@@ -7,14 +7,14 @@
 
 import Foundation
 
-public struct TezosPreapplyResponseParser {
-    public static func parse(jsonArray:Array<[String:Any]>) -> Bool {
-        for dic in jsonArray {
-            guard let contents = dic["contents"] as? Array<[String:Any]> else {
+public struct TezosPreapplyResponseParser {    
+    public static func parse(results:Array<PreappleOperationResult>) -> Bool {
+        for result in results {
+            guard let contents = result.contents else {
                 return false
             }
             for content in contents {
-                guard let metadata = content["metadata"] as? [String:Any] ,let results = metadata["operation_result"] as? [String:Any],let status = results["status"] as? String else {
+                guard let metadata = content.metadata,let results = metadata.operation_result,let status = results.status else {
                     return false
                 }
                 if OperationResultStatus.get(status: status) == .FAILED {
