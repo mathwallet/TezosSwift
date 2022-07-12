@@ -56,6 +56,15 @@
         }
       },
       {
+        "package": "PromiseKit",
+        "repositoryURL": "https://github.com/mxcl/PromiseKit.git",
+        "state": {
+          "branch": null,
+          "revision": "c946b7561fbe11379a874e59faa2c5f8077ae0e1",
+          "version": "6.17.1"
+        }
+      },
+      {
         "package": "Sr25519",
         "repositoryURL": "https://github.com/lishuailibertine/Sr25519.swift.git",
         "state": {

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeaconBlockchainTezos
 
 // MARK: ChainHead
 public struct GetChainHeadResult:Codable {
@@ -61,7 +62,39 @@ public struct TezosBlockchainMetadata {
     public var constants: TezosNetworkConstants
 }
 
+// MARK: GET BALANCE FA2
 
+public struct FA2BalanceResult:Codable {
+    var data:[Micheline.Prim]?
+    var balance:String {
+        guard let prim = data?.first else {
+            return ""
+        }
+        let args = prim.args
+        guard let intExpression = args?.first else {
+            return ""
+        }
+        switch intExpression {
+        case let .literal(literal):
+            switch literal {
+            case let .int(balance):
+                return balance
+            default:
+                return ""
+            }
+        default:
+            return ""
+        }
+    }
+}
+
+// MARK: GET BALANCE FA1.2
+public struct FA1_2BalanceResult:Codable {
+    var data:FA1_2ResultData?
+}
+public struct FA1_2ResultData:Codable {
+    var int:String?
+}
 // MARK: NFT
 
 public struct TezosNFTResult:Codable {

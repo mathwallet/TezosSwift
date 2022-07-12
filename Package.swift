@@ -22,7 +22,8 @@ let package = Package(
         .package(name: "Sodium", url: "https://github.com/jedisct1/swift-sodium.git", from: "0.8.0"),
         .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.4.1"),
         .package(name:"BIP39swift", url: "https://github.com/mathwallet/BIP39swift", from: "1.0.1"),
-        .package(name: "BeaconSDK", url: "https://github.com/xueyuejie/beacon-ios-sdk.git", from: "3.1.3")
+        .package(name: "BeaconSDK", url: "https://github.com/xueyuejie/beacon-ios-sdk.git", from: "3.1.3"),
+        .package(url: "https://github.com/mxcl/PromiseKit.git", from: "6.8.4"),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -37,7 +38,9 @@ let package = Package(
                            "BIP39swift",
                            .product(name: "BeaconBlockchainTezos", package: "BeaconSDK"),
                            .product(name: "BeaconClientWallet", package: "BeaconSDK"),
-                           .product(name: "BeaconTransportP2PMatrix", package: "BeaconSDK")]),
+                           .product(name: "BeaconTransportP2PMatrix", package: "BeaconSDK"),
+                           "PromiseKit"
+                          ]),
         .testTarget(
             name: "TezosSwiftTests",
             dependencies: ["TezosSwift"]),
