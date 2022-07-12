@@ -106,10 +106,10 @@ extension  TezosRpcProvider {
         }
     }
     
-    public func getHeadHeader() -> Promise<String> {
-        return Promise<String> {seal in
-            request(rpcURL: GetHeadHeader(nodeUrl: nodeUrl)).done { (result:String) in
-                seal.fulfill(result)
+    public func getHeadHeader() -> Promise<Int> {
+        return Promise<Int> {seal in
+            request(rpcURL: GetHeadHeader(nodeUrl: nodeUrl)).done { (result:GetHeadHeaderResult) in
+                seal.fulfill(result.level ?? 0)
             }.catch { error in
                 seal.reject(error)
             }
@@ -239,7 +239,7 @@ extension  TezosRpcProvider {
     
     public func preapplyOperation(operationDictionary:[String:Any],branch:String) -> Promise<Bool> {
         return Promise<Bool> {seal in
-            request(rpcURL:  PreapplyOperationURL(nodeUrl:nodeUrl, branch: branch), method: .post, parameters: [operationDictionary].asParameters()).done { (results:Array<PreappleOperationResult>) in
+            request(rpcURL: PreapplyOperationURL(nodeUrl:nodeUrl, branch: branch), method: .post,encoding: ArrayEncoding.default, parameters: [operationDictionary].asParameters()).done { (results:Array<PreappleOperationResult>) in
                 let isSuccess = TezosPreapplyResponseParser.parse(results: results)
                 seal.fulfill(isSuccess)
             }.catch { error in
@@ -250,7 +250,7 @@ extension  TezosRpcProvider {
     
     public func injectOperation(signedString:String) -> Promise<String> {
         return Promise<String> { seal in
-            request(rpcURL: InjectOperationURL(nodeUrl:nodeUrl),parameters: signedString.asParameters()).done { (result:String) in
+            request(rpcURL: InjectOperationURL(nodeUrl:nodeUrl),encoding: StringEncoding.default, parameters: signedString.asParameters()).done { (result:String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
