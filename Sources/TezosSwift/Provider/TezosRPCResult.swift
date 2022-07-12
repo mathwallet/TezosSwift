@@ -67,21 +67,12 @@ public struct TezosBlockchainMetadata {
 public struct FA2BalanceResult:Codable {
     var data:[Micheline.Prim]?
     var balance:String {
-        guard let prim = data?.first else {
+        guard let prim = data?.first,let args = prim.args,let literal = args[1] else {
             return ""
         }
-        let args = prim.args
-        guard let intExpression = args?.first else {
-            return ""
-        }
-        switch intExpression {
-        case let .literal(literal):
-            switch literal {
-            case let .int(balance):
-                return balance
-            default:
-                return ""
-            }
+        switch literal {
+        case let .int(balance):
+            return balance
         default:
             return ""
         }
