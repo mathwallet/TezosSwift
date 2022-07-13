@@ -21,7 +21,7 @@
       },
       {
         "package": "BeaconSDK",
-        "repositoryURL": "https://github.com/xueyuejie/beacon-ios-sdk",
+        "repositoryURL": "https://github.com/xueyuejie/beacon-ios-sdk.git",
         "state": {
           "branch": null,
           "revision": "f05fcdd94f32dddf463ce5a8490b6b7ed7f8ae33",
