@@ -31,8 +31,6 @@ public class TezosTransaction {
     public var contents = [[String:Any]]()
     public var operations = [Tezos.Operation]()
     
-    
-    var signature = ""
     var metadata:TezosBlockchainMetadata
     var forgeString:String?
     

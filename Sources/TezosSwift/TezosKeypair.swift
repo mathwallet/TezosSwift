@@ -17,14 +17,16 @@ public struct TezosKeypair {
     
     public var derivePath: String?
     
+    public var secretKey: Data
+    
     private var keyPair:Ed25519KeyPair?
     
-    public var secretKey: Data {
-        return Data(TezosPrefix.edsk+self.keyPair!.raw.bytes)
-    }
+//    public var secretKey: Data {
+//        return Data(TezosPrefix.edsk+self.keyPair!.raw.bytes)
+//    }
     
     public var privateKey: String {
-        return Base58.base58CheckEncode(secretKey.bytes)
+        return Base58.base58CheckEncode(TezosPrefix.edsk + secretKey.bytes)
     }
     
     public var publicKey: Data {
@@ -45,35 +47,29 @@ public struct TezosKeypair {
         return Self.publicKeyHashToAddress(publicKeyHash: _publicKeyHash)
     }
     
-    private init(keyPair: Ed25519KeyPair) {
-        self.keyPair = keyPair
-    }
-    
-    public init(secretKey: [UInt8]) throws {
-        let scretKeyBytes = Array(secretKey[4..<secretKey.endIndex])
-        let keyPair = try Ed25519KeyPair(raw: Data(scretKeyBytes))
-        self.init(keyPair: keyPair)
+    public init(secretKey: Data) {
+        self.secretKey = secretKey
+        self.keyPair = try! Ed25519KeyPair(raw:secretKey)
     }
     
     public init(privateKey:String) throws {
         guard let privateBytes = Base58.base58CheckDecode(privateKey) else {
             throw Error.invalidPrivateKey
         }
-        try self.init(secretKey:privateBytes)
+        self.init(secretKey:Data(privateBytes[4..<privateBytes.endIndex]))
     }
     
-    public init(seed: Data,path:String = "m/44'/1729'/0'/0'")throws {
-        let (derivedSeed,_) = TezosKeypair.ed25519DeriveKey(path: path, seed: seed)
-        let ed25519KeyPair = try Ed25519KeyPair(seed: Ed25519Seed(raw: derivedSeed))
-        self.init(keyPair: ed25519KeyPair)
-        self.derivePath = path
+    public init(seed: Data)throws {
+        let ed25519KeyPair = try Ed25519KeyPair(seed: Ed25519Seed(raw: seed))
+        self.init(secretKey: ed25519KeyPair.raw)
     }
     
     public init(mnemonics: String, path: String = "m/44'/1729'/0'/0'") throws {
         guard let mnemonicSeed = BIP39.seedFromMmemonics(mnemonics) else {
             throw Error.invalidMnemonic
         }
-        try self.init(seed: mnemonicSeed)
+        let (derivedSeed,_) = TezosKeypair.ed25519DeriveKey(path: path, seed: mnemonicSeed)
+        try self.init(seed: derivedSeed)
         self.mnemonics = mnemonics
         self.derivePath = path
     }
@@ -113,11 +109,11 @@ extension TezosKeypair {
 
 extension TezosKeypair {
     public func signDigest(messageDigest:Data) -> Data {
-        return try! Ed25519KeyPair(raw:self.keyPair!.raw).sign(message: messageDigest).raw
+        return try! Ed25519KeyPair(raw:self.secretKey).sign(message: messageDigest).raw
     }
     
     public func verifyPublickey(message: Data, signature: Data) -> Bool {
-        return try! Ed25519KeyPair(raw:self.keyPair!.raw).verify(message: message, signature: Ed25519Signature(raw: signature))
+        return try! Ed25519KeyPair(raw:self.secretKey).verify(message: message, signature: Ed25519Signature(raw: signature))
     }
 }
 

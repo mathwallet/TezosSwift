@@ -11,11 +11,11 @@ import BeaconBlockchainTezos
 // MARK: ChainHead
 public struct GetChainHeadResult:Codable {
     public var hash:String?
-    public var chaid_id:String?
+    public var chain_id:String?
     public var protocolString:String?
     enum CodingKeys: String, CodingKey {
             case hash
-            case chaid_id
+            case chain_id
             case protocolString = "protocol"
         }
 }

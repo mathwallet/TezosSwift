@@ -10,6 +10,7 @@ import Alamofire
 import PromiseKit
 import CryptoSwift
 import BeaconBlockchainTezos
+import SwiftUI
 
 public struct TezosRpcProvider {
     
@@ -168,17 +169,16 @@ extension  TezosRpcProvider {
     
     public func getMetadata(address:String) -> Promise<TezosBlockchainMetadata> {
         return Promise<TezosBlockchainMetadata> {seal in
-            firstly {
-                when(fulfilled:
-                    getCounter(address: address),
-                     getBlocksHead(),
-                     getManagerKey(address: address),
-                     getConstants()
-                )
-            }.done { (counter, blocksHead, managerKey, constants) in
-                seal.fulfill(TezosBlockchainMetadata(blockHash: blocksHead.hash ?? "", protocolString: blocksHead.protocolString ?? "", counter: Int(counter) ?? 0 + 1, key:managerKey, constants: constants))
-            }.catch { error in
-                seal.reject(error)
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    let counter = try getCounter(address: address).wait()
+                    let blocksHead = try getBlocksHead().wait()
+                    let managerKey = try getManagerKey(address: address).wait()
+                    let constants = try getConstants().wait()
+                    seal.fulfill(TezosBlockchainMetadata(blockHash: blocksHead.hash ?? "", protocolString: blocksHead.protocolString ?? "", counter: (Int(counter) ?? 0) + 1, key:managerKey, constants: constants))
+                } catch let error {
+                    seal.reject(error)
+                }
             }
         }
     }
@@ -196,12 +196,21 @@ extension  TezosRpcProvider {
                     ],
                     "chain_id":metadata.chainId ?? "NetXdQprcVkpaWU"
                 ]
-                request(rpcURL: RunOperationURL(nodeUrl:nodeUrl), method: .post, parameters: p).done { (result:[[String:String]]) in
-                    let parser = TezosSimulationResponseParser(constants: metadata.constants)
-                    if let responseResult = parser.parseSimulation(jsonDic: result){
-                        seal.fulfill(responseResult)
-                    } else {
-                        seal.reject(TezosRpcProviderError.server(message: "Parameter error"))
+                self.requestData(rpcURL: RunOperationURL(nodeUrl:nodeUrl), method: .post, parameters: p, encoding: JSONEncoding.default).done{data in
+                    do {
+                        let json = try JSONSerialization.jsonObject(with: data,options: .mutableContainers)
+                        if let dic = json as? [String:Any] {
+                            let parser = TezosSimulationResponseParser(constants: metadata.constants)
+                            if let responseResult = parser.parseSimulation(jsonDic: dic) {
+                                seal.fulfill(responseResult)
+                            } else {
+                                seal.reject(TezosRpcProviderError.server(message: "error data"))
+                            }
+                        } else {
+                            seal.reject(TezosRpcProviderError.server(message: "error data"))
+                        }
+                    } catch let e {
+                        seal.reject(e)
                     }
                 }.catch { error in
                     seal.reject(error)
@@ -239,7 +248,7 @@ extension  TezosRpcProvider {
     
     public func preapplyOperation(operationDictionary:[String:Any],branch:String) -> Promise<Bool> {
         return Promise<Bool> {seal in
-            request(rpcURL: PreapplyOperationURL(nodeUrl:nodeUrl, branch: branch), method: .post,encoding: ArrayEncoding.default, parameters: [operationDictionary].asParameters()).done { (results:Array<PreappleOperationResult>) in
+            request(rpcURL: PreapplyOperationURL(nodeUrl:nodeUrl, branch: branch), method: .post, parameters: [operationDictionary].asParameters(),encoding: ArrayEncoding.default).done { (results:Array<PreappleOperationResult>) in
                 let isSuccess = TezosPreapplyResponseParser.parse(results: results)
                 seal.fulfill(isSuccess)
             }.catch { error in
@@ -250,7 +259,7 @@ extension  TezosRpcProvider {
     
     public func injectOperation(signedString:String) -> Promise<String> {
         return Promise<String> { seal in
-            request(rpcURL: InjectOperationURL(nodeUrl:nodeUrl),encoding: StringEncoding.default, parameters: signedString.asParameters()).done { (result:String) in
+            request(rpcURL: InjectOperationURL(nodeUrl:nodeUrl),method: .post,parameters: signedString.asParameters(),encoding: StringEncoding.default).done { (result:String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -263,15 +272,16 @@ extension  TezosRpcProvider {
 // MARK: preapplyTransaction
 extension TezosRpcProvider {
     
-    public func preapplyTransaction(transaction:TezosTransaction) -> Promise<Bool> {
-        return Promise<Bool> {seal in
+    public func preapplyTransaction(transaction:TezosTransaction) -> Promise<TezosTransaction> {
+        return Promise<TezosTransaction> {seal in
             transaction.operations.forEach { operation in
                 transaction.resetOperation()
                 calculateFees(operation: operation, metadata: transaction.metadata).then { havefeeOperation -> Promise< String> in
+                    transaction.addOperation(operation: havefeeOperation)
                     return forge(branch: transaction.branch, operation: havefeeOperation)
                 }.done { forgeResult in
                     transaction.forgeString = forgeResult
-                    seal.fulfill(true)
+                    seal.fulfill(transaction)
                 }.catch { error in
                     seal.reject(error)
                 }
@@ -283,17 +293,16 @@ extension TezosRpcProvider {
         return Promise<Tezos.Operation> {seal in
             switch operation{
             case .transaction(_),.reveal(_),.origination(_),.delegation(_):
-                firstly {
-                    when(fulfilled:
-                            getSimulationResponse(metadata: metadata, operation: operation),
-                         forge(branch: metadata.blockHash, operation: operation)
-                    )
-                }.done { (response, forgeResult) in
-                    let service = TezosFeeEstimatorService()
-                    let haveFeeOperation = service.calculateFeesAndCreatOperation(response: response, operation: operation, operationSize: service.getForgedOperationsSize(forgeResult: forgeResult))
-                    seal.fulfill(haveFeeOperation)
-                }.catch { error in
-                    seal.reject(error)
+                DispatchQueue.global(qos: .userInitiated).async {
+                    do {
+                        let response = try getSimulationResponse(metadata: metadata, operation: operation).wait()
+                        let forgeResult = try forge(branch: metadata.blockHash, operation: operation).wait()
+                        let service = TezosFeeEstimatorService()
+                        let haveFeeOperation = service.calculateFeesAndCreatOperation(response: response, operation: operation, operationSize: service.getForgedOperationsSize(forgeResult: forgeResult))
+                        seal.fulfill(haveFeeOperation)
+                    } catch let error {
+                        seal.reject(error)
+                    }
                 }
             default:
                 seal.fulfill(operation)
@@ -303,17 +312,27 @@ extension TezosRpcProvider {
 }
 
 extension TezosRpcProvider {
-    func request<T:Codable>(rpcURL:RPCURL,method: HTTPMethod = .get,encoding: ParameterEncoding = JSONEncoding.default,parameters:Parameters? = nil) -> Promise<T> {
-        return Promise { seal in
+    func request<T:Codable>(rpcURL:RPCURL,method: HTTPMethod = .get,parameters:Parameters? = nil,encoding: ParameterEncoding = JSONEncoding.default) -> Promise<T> {
+        return Promise<T> { seal in
+            self.requestData(rpcURL: rpcURL, method: method, parameters: parameters, encoding: encoding).done{data in
+                do {
+                    let result = try JSONDecoder().decode(T.self, from: data)
+                    seal.fulfill(result)
+                } catch let e {
+                    seal.reject(e)
+                }
+            }.catch { error in
+                seal.reject(error)
+            }
+        }
+    }
+    
+    func requestData(rpcURL:RPCURL,method: HTTPMethod = .get,parameters:Parameters? = nil,encoding: ParameterEncoding = JSONEncoding.default) -> Promise<Data> {
+        return Promise<Data> { seal in
             AF.request(rpcURL.RPCURLString, method: method, parameters: parameters, encoding: encoding).responseData { response in
                 switch response.result {
                 case .success(let data):
-                    do {
-                        let result = try JSONDecoder().decode(T.self, from: data)
-                        seal.fulfill(result)
-                    } catch let e {
-                        seal.reject(e)
-                    }
+                    seal.fulfill(data)
                 case let .failure(e):
                     seal.reject(e)
                 }
