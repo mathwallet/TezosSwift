@@ -196,13 +196,13 @@ extension  TezosRpcProvider {
                     ],
                     "chain_id":metadata.chainId ?? "NetXdQprcVkpaWU"
                 ]
-                request(rpcURL: RunOperationURL(nodeUrl:nodeUrl), method: .post, parameters: p).done { (result:[String:String]) in
-//                    let parser = TezosSimulationResponseParser(constants: metadata.constants)
-//                    if let content = result.contents,let response = parser.parseSimulation(contents: content) {
-//                        seal.fulfill(response)
-//                    }else {
-//                        seal.reject(TezosRpcProviderError.server(message: "Parameter error"))
-//                    }
+                request(rpcURL: RunOperationURL(nodeUrl:nodeUrl), method: .post, parameters: p).done { (result:[[String:String]]) in
+                    let parser = TezosSimulationResponseParser(constants: metadata.constants)
+                    if let responseResult = parser.parseSimulation(jsonDic: result){
+                        seal.fulfill(responseResult)
+                    } else {
+                        seal.reject(TezosRpcProviderError.server(message: "Parameter error"))
+                    }
                 }.catch { error in
                     seal.reject(error)
                 }
