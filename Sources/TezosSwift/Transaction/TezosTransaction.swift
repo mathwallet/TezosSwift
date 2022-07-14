@@ -12,10 +12,7 @@ import CryptoSwift
 import BigInt
 
 public class TezosTransaction {
-    
-    public var from:String
-    public var to:String
-    public var amount:String
+
     public var metadata:TezosBlockchainMetadata
     public var operations = [TransactionOperation]()
     
@@ -35,11 +32,16 @@ public class TezosTransaction {
         return self.metadata.protocolString
     }
     
-    public init(from:String,to:String,amount:String,metadata:TezosBlockchainMetadata) {
-        self.from = from
-        self.to = to
-        self.amount = amount
+    public init(metadata:TezosBlockchainMetadata) {
         self.metadata = metadata
+    }
+    
+    public func addOperation(_ operation:TransactionOperation) {
+        self.operations.append(operation)
+    }
+    
+    public func resetOperations() {
+        self.operations.removeAll()
     }
     
     public func configOperations(operations:[TransactionOperation]) {
@@ -61,5 +63,11 @@ public class TezosTransaction {
         let prepareData = Data(prepareBytes)
         return keypair.signDigest(messageDigest: prepareData)
     }
+}
+
+public enum TezosTransactionType {
+    case XTZ
+    case FA1_2
+    case FA2
 }
 
