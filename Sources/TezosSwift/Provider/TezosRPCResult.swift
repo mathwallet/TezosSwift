@@ -44,7 +44,7 @@ public struct FA1_2ResultData:Codable {
 // MARK: GET BALANCE FA2
 
 public struct FA2BalanceResult:Codable {
-    var data:[Micheline.Prim]?
+    var data:[TezosPrim]?
     public var balance:String {
         guard let prim = data?.first,let args = prim.args else {
             return ""

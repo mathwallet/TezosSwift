@@ -8,8 +8,7 @@
 import Foundation
 
 public class TransactionF2Operation: TransactionOperation {
-    let to:String
-    public init(from: String, to: String,mint:String, counter: String, amount: String, kind: TezosOperationKind = .transaction, operationFees: OperationFees? = nil)  {
+    public init(from: String, to: String,mint:String, counter: String, amount: String,tokenId:String = "0",kind: TezosOperationKind = .transaction, operationFees: OperationFees? = nil)  {
         super.init(source: from, counter: counter, destination: mint, amount: "0", kind: kind, operationFees: operationFees ?? defultoperationFees)
         self.parameters = self.createTezosParameters(from:from, to: to, amount: amount,tokenId: tokenId)
     }
