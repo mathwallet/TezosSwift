@@ -7,13 +7,15 @@
 
 import Foundation
 
-public protocol RPCURL {
+public protocol RPCURLRequest {
+    var parmaters:Encodable? {get}
     var RPCURLString:String {get}
 }
 
-public struct GetChainIDURL:RPCURL {
-    let nodeUrl:String
+public struct GetChainIDURL:RPCURLRequest {
+    public var parmaters:Encodable?
     
+    let nodeUrl:String
     init(nodeUrl:String) {
         self.nodeUrl = nodeUrl
     }
@@ -23,9 +25,10 @@ public struct GetChainIDURL:RPCURL {
     }
 }
 
-public struct GetHeadHeader:RPCURL {
-    let nodeUrl:String
+public struct GetHeadHeader:RPCURLRequest {
+    public var parmaters: Encodable?
     
+    let nodeUrl:String
     init(nodeUrl:String) {
         self.nodeUrl = nodeUrl
     }
@@ -35,9 +38,10 @@ public struct GetHeadHeader:RPCURL {
     }
 }
 
-public struct GetHeadHashURL:RPCURL {
-    let nodeUrl:String
+public struct GetHeadHashURL:RPCURLRequest {
+    public var parmaters: Encodable?
     
+    let nodeUrl:String
     init(nodeUrl:String) {
         self.nodeUrl = nodeUrl
     }
@@ -47,9 +51,10 @@ public struct GetHeadHashURL:RPCURL {
     }
 }
 
-public struct GetBlockHeadURL:RPCURL {
-    let nodeUrl:String
+public struct GetBlockHeadURL:RPCURLRequest {
+    public var parmaters: Encodable?
     
+    let nodeUrl:String
     init(nodeUrl:String) {
         self.nodeUrl = nodeUrl
     }
@@ -59,7 +64,8 @@ public struct GetBlockHeadURL:RPCURL {
     }
 }
 
-public struct GetManagerKeyURL:RPCURL {
+public struct GetManagerKeyURL:RPCURLRequest {
+    public var parmaters: Encodable?
     let nodeUrl:String
     let address:String
     
@@ -73,7 +79,9 @@ public struct GetManagerKeyURL:RPCURL {
     }
 }
 
-public struct GetCounterURL:RPCURL {
+public struct GetCounterURL:RPCURLRequest {
+    public var parmaters: Encodable?
+    
     let nodeUrl:String
     let address:String
     
@@ -87,9 +95,10 @@ public struct GetCounterURL:RPCURL {
     }
 }
 
-public struct GetNetworkConstantsURL:RPCURL {
-    let nodeUrl:String
+public struct GetNetworkConstantsURL:RPCURLRequest {
+    public var parmaters: Encodable?
     
+    let nodeUrl:String
     init(nodeUrl:String) {
         self.nodeUrl = nodeUrl
     }
@@ -98,7 +107,9 @@ public struct GetNetworkConstantsURL:RPCURL {
     }
 }
 
-public struct GetBalanceURL:RPCURL {
+public struct GetBalanceURL:RPCURLRequest {
+    public var parmaters: Encodable?
+    
     let nodeUrl:String
     let address:String
     
@@ -112,9 +123,12 @@ public struct GetBalanceURL:RPCURL {
     }
 }
 
-public struct GetNFTURL:RPCURL {
+public struct GetNFTURL:RPCURLRequest {
+    public var parmaters: Encodable?
+    
     let address:String
     let limit:String
+    
     init(address:String,limit:String) {
         self.address = address
         self.limit = limit
@@ -125,49 +139,74 @@ public struct GetNFTURL:RPCURL {
     }
 }
 
-public struct RunViewURL:RPCURL {
+public struct RunViewURL:RPCURLRequest {
+    public var parmaters:Encodable?
+    
     let nodeUrl:String
+    public init(nodeUrl:String,input:TezosArg,chainId:String,mode:String = "Readable",mint:String,entrypoint:String) {
+        self.nodeUrl = nodeUrl
+        self.parmaters = RunViewParmater(unparsing_mode: mode, contract: mint, entrypoint: entrypoint, chain_id: chainId, input: input)
+    }
     public var RPCURLString:String {
         return nodeUrl + "/chains/main/blocks/head/helpers/scripts/run_view"
     }
 }
 
-public struct RunOperationURL:RPCURL {
+public struct RunOperationURL:RPCURLRequest {
     let nodeUrl:String
+    public var parmaters:Encodable?
+    
+    public init(nodeUrl:String,operations:[TransactionOperation],metadata:TezosBlockchainMetadata) {
+        self.nodeUrl = nodeUrl
+        self.parmaters = RunOperationParmater(operation: SignedRunOperationPayload(contents: operations, branch: metadata.blockHash, signature: defultSignature),
+                                              chain_id: metadata.chainId!)
+    }
     public var RPCURLString:String {
         return nodeUrl + "/chains/main/blocks/head/helpers/scripts/run_operation"
     }
 }
 
-public struct ForgeURL:RPCURL {
+public struct ForgeURL:RPCURLRequest {
     let nodeUrl:String
     let headHash:String
-    init(nodeUrl:String,headHash:String) {
+    public var parmaters:Encodable?
+    
+    init(nodeUrl:String,headHash:String,operations:[TransactionOperation],branch:String) {
         self.nodeUrl = nodeUrl
         self.headHash = headHash
+        self.parmaters = ForgeURLParmaster(contents: operations, branch: branch)
     }
+    
     public var RPCURLString:String {
         return nodeUrl + "/chains/main/blocks/" + headHash + "/helpers/forge/operations"
     }
 }
 
-public struct PreapplyOperationURL:RPCURL {
+public struct PreapplyOperationURL:RPCURLRequest {
     let nodeUrl:String
     let branch:String
-    init(nodeUrl:String,branch:String) {
+    public var parmaters:Encodable?
+    
+    init(nodeUrl:String,branch:String,operations:[TransactionOperation], protocolString: String, signature: String) {
         self.nodeUrl = nodeUrl
         self.branch = branch
+        self.parmaters = [SignedOperationPayload(contents: operations, branch: branch, protocol: protocolString, signature: signature)]
     }
+    
     public var RPCURLString:String {
         return nodeUrl + "/chains/main/blocks/" + branch + "/helpers/preapply/operations"
     }
 }
 
-public struct InjectOperationURL:RPCURL {
+public struct InjectOperationURL:RPCURLRequest {
+    public var parmaters:Encodable?
+    
     let nodeUrl:String
-    init(nodeUrl:String) {
+    init(nodeUrl:String,sendString:String) {
         self.nodeUrl = nodeUrl
+        self.parmaters = sendString
     }
+    
     public var RPCURLString:String {
         return nodeUrl + "/injection/operation"
     }

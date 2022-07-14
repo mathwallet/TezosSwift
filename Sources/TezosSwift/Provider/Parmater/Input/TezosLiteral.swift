@@ -1,12 +1,7 @@
-//
-//  MichelineLiteral.swift
-//  
-//
-//  Created by Mike Godenzi on 22.10.20.
-//  Copyright © 2020 Papers AG. All rights reserved.
-//
+
 
 import Foundation
+import CryptoSwift
 
 public enum TezosLiteral: Codable, Hashable, Equatable {
     case string(String)
@@ -24,7 +19,7 @@ public enum TezosLiteral: Codable, Hashable, Equatable {
             return
         }
         if let value = try container.decodeIfPresent(String.self, forKey: .bytes) {
-            self = .bytes(try HexString(from: value).asBytes())
+            self = .bytes(Data(hex: value).bytes)
             return
         }
         throw SerializationError.invalidType
@@ -38,7 +33,7 @@ public enum TezosLiteral: Codable, Hashable, Equatable {
         case let .int(value):
             try container.encode(value, forKey: .int)
         case let .bytes(value):
-            try container.encode(HexString(from: value).asString(withPrefix: true), forKey: .bytes)
+            try container.encode(value.toHexString(), forKey: .bytes)
         }
     }
     

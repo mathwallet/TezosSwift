@@ -1,21 +1,32 @@
 import Foundation
 
-
+public let defultoperationFees = OperationFees(fee: 0, gasLimit: MAXGAS, storageLimit: MAXSTORAGE)
 public class TransactionOperation:Encodable {
-    let kind:TezosOperationKind
-    let source:String
-    let destination:String
-    let counter:String
-    let amount:String = "0"
-    public var operationFees:OperationFees = OperationFees(fee: 0, gasLimit: MAXGAS, storageLimit: MAXSTORAGE)
+    var kind:TezosOperationKind
+    var source:String
+    var destination:String
+    var counter:String
+    var amount:String = "0"
+    public var operationFees:OperationFees
     public var parameters:TezosParameters?
-    public init(from:String,to:String,counter:String,amount:String,kind:TezosOperationKind = .transaction,operationFees:OperationFees? = nil) {
+    public init(from:String,to:String,counter:String,amount:String,kind:TezosOperationKind = .transaction,operationFees:OperationFees? = nil,parameters:TezosParameters? = nil) {
         self.source = from
         self.destination = to
         self.counter = counter
         self.amount = amount
         self.kind = kind
-        self.operationFees = operationFees
+        self.operationFees = operationFees ?? defultoperationFees
+        self.parameters = parameters
+    }
+    
+    public init(source:String,counter:String,destination:String,amount:String,kind:TezosOperationKind = .transaction,operationFees:OperationFees? = nil,parameters:TezosParameters? = nil) {
+        self.source = source
+        self.destination = destination
+        self.counter = counter
+        self.amount = amount
+        self.kind = kind
+        self.operationFees = operationFees ?? defultoperationFees
+        self.parameters = parameters
     }
     
     private enum OperationKeys: String, CodingKey {

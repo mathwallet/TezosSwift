@@ -1,16 +1,11 @@
-//
-//  File.swift
-//  
-//
-//  Created by 薛跃杰 on 2022/7/13.
-//
+
 
 import Foundation
 
 public struct TezosParameters: Codable, Equatable {
     
     public let entrypoint: Entrypoint
-    public let value: TezosPrim
+    public let value: TezosArg
     
     public init(entrypoint: Entrypoint, value: TezosArg) {
         self.entrypoint = entrypoint

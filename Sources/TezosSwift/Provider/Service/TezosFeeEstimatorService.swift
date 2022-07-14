@@ -6,14 +6,14 @@
 //
 
 import Foundation
-import BeaconBlockchainTezos
 
 public struct TezosFeeEstimatorService {
+    
     public func getForgedOperationsSize(forgeResult:String) -> Int {
         return forgeResult.count/2 + 64
     }
     
-    public func calculateFeesAndCreatOperation(response:SimulationResponse,operation:Tezos.Operation,operationSize:Int) -> Tezos.Operation{
+    public func calculateFeesAndCreateOperation(response:SimulationResponse,operation:TransactionOperation,operationSize:Int) -> TransactionOperation{
         let fees = self.calculateFees(response: response, operationSize: operationSize)
         return self.createOperation(operation: operation, fees: fees)
     }
@@ -58,18 +58,7 @@ public struct TezosFeeEstimatorService {
 }
 
 extension TezosFeeEstimatorService  {
-    public func createOperation(operation:Tezos.Operation,fees: OperationFees) -> Tezos.Operation {
-        switch operation {
-        case let .transaction(content):
-            return Tezos.Operation.transaction(Tezos.Operation.Transaction(source:content.source , fee:"\(fees.fee)" , counter: content.counter, gasLimit: "\(fees.gasLimit)", storageLimit: "\(fees.storageLimit)", amount: content.amount, destination: content.destination, parameters: content.parameters))
-        case let .reveal(content):
-            return Tezos.Operation.reveal(Tezos.Operation.Reveal(source: content.source, fee: "\(fees.fee)", counter: content.counter, gasLimit: "\(fees.gasLimit)", storageLimit: "\(fees.storageLimit)", publicKey: content.publicKey))
-        case let .origination(content):
-            return Tezos.Operation.origination(Tezos.Operation.Origination(source: content.source, fee: "\(fees.fee)", counter: content.counter, gasLimit: "\(fees.gasLimit)", storageLimit: "\(fees.storageLimit)", balance: content.balance, delegate: content.delegate, script: content.script))
-        case let .delegation(content):
-            return Tezos.Operation.delegation(Tezos.Operation.Delegation(source: content.source, fee: "\(fees.fee)", counter: content.counter, gasLimit: "\(fees.gasLimit)", storageLimit: "\(fees.storageLimit)", delegate: content.delegate))
-        default :
-            return operation
-        }
+    public func createOperation(operation:TransactionOperation,fees: OperationFees) -> TransactionOperation {
+        return TransactionOperation(source: operation.source, counter: operation.counter, destination: operation.destination, amount: operation.amount, kind: operation.kind, operationFees: fees, parameters: operation.parameters)
     }
 }

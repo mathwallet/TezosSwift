@@ -2,30 +2,12 @@
   "object": {
     "pins": [
       {
-        "package": "Alamofire",
-        "repositoryURL": "https://github.com/Alamofire/Alamofire.git",
-        "state": {
-          "branch": null,
-          "revision": "354dda32d89fc8cd4f5c46487f64957d355f53d8",
-          "version": "5.6.1"
-        }
-      },
-      {
         "package": "Base58Swift",
         "repositoryURL": "https://github.com/mathwallet/Base58Swift.git",
         "state": {
           "branch": null,
           "revision": "916940466f7e149b4029832ba5521252d7d68d92",
           "version": "3.0.0"
-        }
-      },
-      {
-        "package": "BeaconSDK",
-        "repositoryURL": "https://github.com/xueyuejie/beacon-ios-sdk.git",
-        "state": {
-          "branch": null,
-          "revision": "f05fcdd94f32dddf463ce5a8490b6b7ed7f8ae33",
-          "version": "3.1.3"
         }
       },
       {
