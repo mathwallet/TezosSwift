@@ -3,7 +3,7 @@ import BIP39swift
 import Ed25519
 import CryptoSwift
 import Base58Swift
-import Sodium
+import Blake2
 
 public struct TezosPrefix {
     public static let edsk:[UInt8] = [43, 246, 78, 7]
@@ -21,10 +21,6 @@ public struct TezosKeypair {
     
     private var keyPair:Ed25519KeyPair?
     
-//    public var secretKey: Data {
-//        return Data(TezosPrefix.edsk+self.keyPair!.raw.bytes)
-//    }
-    
     public var privateKey: String {
         return Base58.base58CheckEncode(TezosPrefix.edsk + secretKey.bytes)
     }
@@ -34,10 +30,10 @@ public struct TezosKeypair {
     }
     
     public var publicKeyHash: Data? {
-        guard let hashedBytes = Sodium().genericHash.hash(message:publicKey.bytes, outputLength: 20) else {
+        guard let hashedData = self.genericHash(messageData: publicKey, outputLength: 20)else {
             return nil
         }
-        return Data(hashedBytes)
+        return hashedData
     }
     
     public var address:String {
@@ -114,6 +110,14 @@ extension TezosKeypair {
     
     public func verifyPublickey(message: Data, signature: Data) -> Bool {
         return try! Ed25519KeyPair(raw:self.secretKey).verify(message: message, signature: Ed25519Signature(raw: signature))
+    }
+    
+    public func genericHash(messageData:Data,outputLength:Int) -> Data? {
+        let messageBytes = messageData.bytes
+        guard let hash = try? Blake2.hash(.b2b, size: outputLength, bytes: messageBytes) else {
+            return nil
+        }
+        return Data(hash)
     }
 }
 

@@ -1,7 +1,7 @@
 import XCTest
 import CryptoSwift
 import Ed25519
-import Sodium
+
 @testable import TezosSwift
 
 

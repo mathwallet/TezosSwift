@@ -7,7 +7,6 @@
 
 import Foundation
 import Base58Swift
-import Sodium
 import CryptoSwift
 import BigInt
 
@@ -57,10 +56,10 @@ public class TezosTransaction {
     }
     
     func signHexString(keypair:TezosKeypair,hexString:String) -> Data? {
-        guard let prepareBytes = Sodium().genericHash.hash(message: [3] + Data(hex: hexString).bytes, outputLength: 32)else{
+        let messageBytes = [3] + Data(hex: hexString).bytes
+        guard let prepareData = keypair.genericHash(messageData: Data(messageBytes), outputLength: 32) else {
             return nil
         }
-        let prepareData = Data(prepareBytes)
         return keypair.signDigest(messageDigest: prepareData)
     }
 }
