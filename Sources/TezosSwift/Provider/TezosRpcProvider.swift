@@ -91,6 +91,8 @@ extension  TezosRpcProvider {
                 } else {
                     seal.reject(TezosRpcProviderError.server(message: "error data"))
                 }
+            }.catch { error in
+                seal.reject(error)
             }
         }
     }
