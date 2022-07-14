@@ -288,7 +288,7 @@ extension TezosRpcProvider {
     
     func sendRequest<T:Codable>(request:RPCURLRequest,method:HTTPMethod = .get) -> Promise<T> {
         return Promise<T> { seal in
-            DispatchQueue.global(qos: .userInitiated).async {
+            DispatchQueue.main.async {
                 let config = URLSessionConfiguration.default
                 let urlSession = URLSession(configuration: config)
                 guard let urlRequest = self.configUrlRequest(request: request, method: method) else {
