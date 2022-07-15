@@ -288,7 +288,6 @@ extension TezosRpcProvider {
     func sendRequest<T:Codable>(request:RPCURLRequest,method:HTTPMethod = .get) -> Promise<T> {
         return Promise<T> {seal in
             var task:URLSessionTask? = nil
-            let queue = DispatchQueue.main
             do {
                 let config = URLSessionConfiguration.default
                 let urlSession = URLSession(configuration: config)
@@ -305,7 +304,7 @@ extension TezosRpcProvider {
                         seal.reject(TezosRpcProviderError.server(message: "Node response is empty"))
                         return
                     }
-                    if let result = try? JSONDecoder().decode(T.self, from: data) {
+                    if let result = try? JSONDecoder().decode(T.self, from: data!) {
                         seal.fulfill(result)
                     }
                 }
