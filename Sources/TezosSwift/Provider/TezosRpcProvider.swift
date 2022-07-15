@@ -397,7 +397,7 @@ extension TezosRpcProvider {
                 urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
                 urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
                 if let p = request.parmaters {
-                    urlRequest.httpBody = try JSONSerialization.data(withJSONObject: p, options: .fragmentsAllowed)
+                    urlRequest.httpBody = try p.toJSONData()
 //                    debugPrint(p)
                 }
 
