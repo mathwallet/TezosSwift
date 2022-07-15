@@ -6,7 +6,6 @@
 //
 
 import Foundation
-//import Alamofire
 import PromiseKit
 import CryptoSwift
 
@@ -160,14 +159,14 @@ extension  TezosRpcProvider {
                     if isSuccess {
                         let hash = try injectOperation(sendString:_sendString).wait()
                         seal.fulfill(hash)
-                    }else {
-                        seal.reject(TezosRpcProviderError.unknown)
+                    } else {
+                        seal.reject(TezosRpcProviderError.server(message: "Transaction structure error"))
                     }
                 } catch let error {
                     seal.reject(error)
                 }
             }else {
-                seal.reject(TezosRpcProviderError.server(message: ""))
+                seal.reject(TezosRpcProviderError.server(message: "Transaction not signed"))
             }
         }
     }
@@ -184,7 +183,7 @@ extension  TezosRpcProvider {
                     seal.reject(error)
                 }
             }else {
-                seal.reject(TezosRpcProviderError.server(message: ""))
+                seal.reject(TezosRpcProviderError.server(message: "Transaction not signed"))
             }
         }
     }
@@ -289,36 +288,41 @@ extension TezosRpcProvider {
     func sendRequest<T:Codable>(request:RPCURLRequest,method:HTTPMethod = .get) -> Promise<T> {
         return Promise<T> { seal in
             DispatchQueue.main.async {
-                let config = URLSessionConfiguration.default
-                let urlSession = URLSession(configuration: config)
-                guard let urlRequest = self.configUrlRequest(request: request, method: method) else {
-                    seal.reject(TezosRpcProviderError.server(message: "Wrong parmaters"))
-                    return
-                }
-                let task = urlSession.dataTask(with: urlRequest) { (data, response, error) in
-                    guard error == nil else {
-                        seal.reject(error!)
+                do {
+                    let config = URLSessionConfiguration.default
+                    let urlSession = URLSession(configuration: config)
+                    guard let urlRequest = try self.configUrlRequest(request: request, method: method) else {
+                        seal.reject(TezosRpcProviderError.server(message: "Wrong parmaters"))
                         return
                     }
-                    guard data != nil else {
-                        seal.reject(TezosRpcProviderError.server(message: "Node response is empty"))
-                        return
+                    let task = urlSession.dataTask(with: urlRequest) { (data, response, error) in
+                        guard error == nil else {
+                            seal.reject(error!)
+                            return
+                        }
+                        guard data != nil else {
+                            seal.reject(TezosRpcProviderError.server(message: "Node response is empty"))
+                            return
+                        }
+                        if let resp = try? JSONDecoder().decode(T.self, from: data!) {
+                            seal.fulfill(resp)
+                        }
                     }
-                    if let resp = try? JSONDecoder().decode(T.self, from: data!) {
-                        seal.fulfill(resp)
-                    }
+                    task.resume()
+                    
+                } catch let error {
+                    seal.reject(error)
                 }
-                task.resume()
             }
         }
     }
-    
-    func configUrlRequest(request:RPCURLRequest,method:HTTPMethod) -> URLRequest?{
+
+    func configUrlRequest(request:RPCURLRequest,method:HTTPMethod) throws -> URLRequest?{
         guard let url = URL(string: request.RPCURLString) else { return nil }
         var urlRequest = URLRequest(url: url)
         if method == .post {
             guard let payload = request.parmaters else {
-                return nil
+                throw TezosRpcProviderError.server(message: "parameter error")
             }
             do {
                 urlRequest.httpMethod = "POST"
@@ -333,7 +337,7 @@ extension TezosRpcProvider {
                 urlRequest.httpBody = jsonData
             }
             catch {
-                return nil
+                throw TezosRpcProviderError.server(message: "parameter error")
             }
         }
         return urlRequest

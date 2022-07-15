@@ -29,6 +29,59 @@ public class TransactionOperation:Encodable {
         self.parameters = parameters
     }
     
+    //Fa1.2
+    
+    public init(from: String, to: String,mint:String, counter: String, amount: String, kind: TezosOperationKind = .transaction, operationFees: OperationFees? = nil) {
+        self.source = from
+        self.destination = mint
+        self.counter = counter
+        self.amount = "0"
+        self.kind = kind
+        self.operationFees = operationFees ?? defultoperationFees
+        self.parameters = self.createFa1_2Parameters(from:from, to: to, amount: amount)
+    }
+    
+    //Fa2
+    public init(from: String, to: String,mint:String, counter: String, amount: String,tokenId:String = "0",kind: TezosOperationKind = .transaction, operationFees: OperationFees? = nil)  {
+        self.source = from
+        self.destination = mint
+        self.counter = counter
+        self.kind = kind
+        self.amount = "0"
+        self.operationFees = operationFees ?? defultoperationFees
+        self.parameters = self.createFa2Parameters(from:from, to: to, amount: amount,tokenId: tokenId)
+    }
+    
+
+}
+// createParameters
+extension TransactionOperation {
+    private func createFa1_2Parameters(from:String,to:String,amount:String) -> TezosParameters {
+        let amountArgs:[TezosArg] = [TezosArg.literal(TezosLiteral.string(to)),TezosArg.literal(TezosLiteral.int(amount))]
+        let amountPrim = TezosPrim(prim: "Pair",args: amountArgs)
+        
+        let fromArgs:[TezosArg] = [TezosArg.literal(TezosLiteral.string(from)),TezosArg.prim(amountPrim)]
+        let valuePrim = TezosPrim(prim: "Pair", args:fromArgs)
+        
+        return TezosParameters(entrypoint: TezosParameters.Entrypoint.custom("transfer"), value: TezosArg.prim(valuePrim))
+    }
+    
+    private func createFa2Parameters(from:String,to:String,amount:String,tokenId:String) -> TezosParameters {
+        let amountArgs:[TezosArg] = [TezosArg.literal(TezosLiteral.int(tokenId)),TezosArg.literal(TezosLiteral.int(amount))]
+        let amountPrim = TezosPrim(prim: "Pair", args: amountArgs)
+        
+        let toArgs:[TezosArg] = [TezosArg.literal(TezosLiteral.string(to)),TezosArg.prim(amountPrim)]
+        let toPrim = TezosPrim(prim: "Pair", args:toArgs)
+        
+        let fromArgs = [TezosArg.literal(TezosLiteral.string(from)),TezosArg.sequence([TezosArg.prim(toPrim)])]
+        let valuePrim = TezosPrim(prim: "Pair", args:fromArgs)
+        
+        return TezosParameters(entrypoint: TezosParameters.Entrypoint.custom("transfer"), value: TezosArg.sequence([TezosArg.prim(valuePrim)]))
+    }
+}
+
+//encode
+extension TransactionOperation {
     private enum OperationKeys: String, CodingKey {
         case kind = "kind"
         case counter = "counter"
@@ -55,7 +108,6 @@ public class TransactionOperation:Encodable {
         try container.encode(parameters, forKey: .parameters)
     }
 }
-
 
 public enum TezosOperationKind: String {
     // Implemented operations
