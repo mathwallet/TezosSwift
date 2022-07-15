@@ -10,7 +10,7 @@ public class TransactionOperation:TezosOperation {
     public var operationFees:OperationFees
     public var parameters:TezosParameters?
     
-    init(source:String,counter:String,destination:String,amount:String,kind:TezosOperationKind = .transaction,operationFees:OperationFees? = nil,parameters:TezosParameters? = nil) {
+    public init(source:String,destination:String,amount:String,counter:String,kind:TezosOperationKind = .transaction,operationFees:OperationFees? = nil,parameters:TezosParameters? = nil) {
         self.source = source
         self.destination = destination
         self.counter = counter

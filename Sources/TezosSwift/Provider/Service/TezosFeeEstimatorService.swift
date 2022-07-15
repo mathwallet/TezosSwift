@@ -59,6 +59,6 @@ public struct TezosFeeEstimatorService {
 
 extension TezosFeeEstimatorService  {
     public func createOperation(operation:TransactionOperation,fees: OperationFees) -> TransactionOperation {
-        return TransactionOperation(source: operation.source, counter: operation.counter, destination: operation.destination, amount: operation.amount, kind: operation.kind, operationFees: fees, parameters: operation.parameters)
+        return TransactionOperation(source: operation.source, destination: operation.destination, amount: operation.amount,counter: operation.counter, kind: operation.kind, operationFees: fees, parameters: operation.parameters)
     }
 }
