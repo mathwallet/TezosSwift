@@ -176,7 +176,7 @@ extension  TezosRpcProvider {
         return Promise<Bool> {seal in
             if let _signature = transaction.signatureString {
                 let request = PreapplyOperationURL(nodeUrl: nodeUrl, branch: transaction.branch, operations: transaction.operations, protocolString: transaction.protocolString, signature:_signature)
-                POST(request: request).done { (results:PreappleOperationResult) in
+                POST(request: request).done { (results:[PreappleOperationResult]) in
                     let isSuccess = TezosPreapplyResponseParser.parse(results: results)
                     if isSuccess {
                         seal.fulfill(isSuccess)
@@ -370,11 +370,6 @@ private extension Encodable {
     func toJSONData() throws -> Data {
         return try JSONEncoder().encode(self)
     }
-}
-
-public enum HTTPMethod: String {
-    case post = "POST"
-    case get = "GET"
 }
 
 public enum TezosRpcProviderError: LocalizedError {
