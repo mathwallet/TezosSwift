@@ -306,10 +306,11 @@ extension TezosRpcProvider {
                         }
                         if let resp = try? JSONDecoder().decode(T.self, from: data!) {
                             seal.fulfill(resp)
+                        } else {
+                            seal.reject(TezosRpcProviderError.server(message: "Result decode error"))
                         }
                     }
                     task.resume()
-                    
                 } catch let error {
                     seal.reject(error)
                 }
