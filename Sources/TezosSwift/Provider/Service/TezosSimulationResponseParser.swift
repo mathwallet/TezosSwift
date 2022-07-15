@@ -20,7 +20,7 @@ public struct TezosSimulationResponseParser {
             for content in contents {
                 if let type = content.kind,
                    let metadata = content.metadata,
-                   let results = metadata.operationResult,
+                   let results = metadata.operation_result,
                    let status = results.status {
                     if OperationResultStatus.get(status: status) == .failed {return nil}
                     var operationExtraFees = ExtraFees()
@@ -34,7 +34,7 @@ public struct TezosSimulationResponseParser {
                     
                     var consumedGas = Int(results.consumed_gas ?? "0" )  ?? 0
                     var consumedStorage = Int(results.paid_storage_size_diff ?? "0") ?? 0
-                    if let internalResults = metadata.internalOperationResults {
+                    if let internalResults = metadata.internal_operation_results {
                         internalResults.forEach { internalResult in
                             if let parsedResult = parseInternalOperationResult(internalResult: internalResult) {
                                 consumedGas += parsedResult.consumedGas
