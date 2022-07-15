@@ -60,7 +60,7 @@ extension TransactionOperation {
         self.parameters = TezosParameters(entrypoint: TezosParameters.Entrypoint.custom("transfer"), value: TezosArg.prim(valuePrim))
     }
     
-    private func configFa2Prameter(source:String,toTokenAddress:String,tokenAmount:String,tokenId:String) {
+    public func configFa2Prameter(source:String,toTokenAddress:String,tokenAmount:String,tokenId:String) {
         let amountArgs:[TezosArg] = [TezosArg.literal(TezosLiteral.int(tokenId)),TezosArg.literal(TezosLiteral.int(tokenAmount))]
         let amountPrim = TezosPrim(prim: "Pair", args: amountArgs)
         
