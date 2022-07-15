@@ -346,10 +346,10 @@ extension  TezosRpcProvider {
 //}
 
 extension TezosRpcProvider {
-     public func GET<T: Codable>(request:RPCURLRequest, queue: DispatchQueue = DispatchQueue.main) -> Promise<T> {
+     public func GET<T: Codable>(request:RPCURLRequest) -> Promise<T> {
         let rp = Promise<Data>.pending()
         var task: URLSessionTask? = nil
-        
+         let queue = DispatchQueue(label: "tezos.get")
         queue.async {
             let url = URL(string: request.RPCURLString)
             var urlRequest = URLRequest(url: url!, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData)
@@ -384,9 +384,10 @@ extension TezosRpcProvider {
             }
     }
 
-    public func POST<T: Decodable>(request:RPCURLRequest, queue: DispatchQueue = DispatchQueue.main) -> Promise<T> {
+    public func POST<T: Decodable>(request:RPCURLRequest) -> Promise<T> {
         let rp = Promise<Data>.pending()
         var task: URLSessionTask? = nil
+        let queue = DispatchQueue(label: "tezos.post")
         queue.async {
             do {
 //                debugPrint("POST \(providerURL)")
