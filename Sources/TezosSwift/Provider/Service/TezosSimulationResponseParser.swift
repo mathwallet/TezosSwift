@@ -16,35 +16,37 @@ public struct TezosSimulationResponseParser {
     
     public func parseSimulation(result:OperationContents) -> SimulationResponse? {
         var simulations = [SimulatedFees]()
-        for content in result.contents  {
-            if let metadata = content.metadata {
-                let type = content.kind
-                let results = metadata.operation_result
-                let status = results.status
-                if OperationResultStatus.get(status: status) == .failed {return nil}
-                var operationExtraFees = ExtraFees()
-                if let allocationfee = parseAllocationFee(results: results) {
-                    operationExtraFees.add(extraFee: allocationfee)
-                }
-                
-                if let burnFee = parseBurnFee(results: results) {
-                    operationExtraFees.add(extraFee: burnFee)
-                }
-                
-                var consumedGas = Int(results.consumed_gas ?? "0" )  ?? 0
-                var consumedStorage = Int(results.paid_storage_size_diff ?? "0") ?? 0
-                if let internalResults = metadata.internal_operation_results {
-                    internalResults.forEach { internalResult in
-                        if let parsedResult = parseInternalOperationResult(internalResult: internalResult) {
-                            consumedGas += parsedResult.consumedGas
-                            consumedStorage += parsedResult.consumedStorage
-                            operationExtraFees += parsedResult.extraFees
+        if let contents = result.contents {
+            for content in contents {
+                if let metadata = content.metadata,
+                    let results = metadata.operation_result {
+                    let type = content.kind
+                    let status = results.status
+                    if OperationResultStatus.get(status: status) == .failed {return nil}
+                    var operationExtraFees = ExtraFees()
+                    if let allocationfee = parseAllocationFee(results: results) {
+                        operationExtraFees.add(extraFee: allocationfee)
+                    }
+                    
+                    if let burnFee = parseBurnFee(results: results) {
+                        operationExtraFees.add(extraFee: burnFee)
+                    }
+                    
+                    var consumedGas = Int(results.consumed_gas)  ?? 0
+                    var consumedStorage = Int(results.paid_storage_size_diff ?? "0") ?? 0
+                    if let internalResults = metadata.internal_operation_results {
+                        internalResults.forEach { internalResult in
+                            if let parsedResult = parseInternalOperationResult(internalResult: internalResult) {
+                                consumedGas += parsedResult.consumedGas
+                                consumedStorage += parsedResult.consumedStorage
+                                operationExtraFees += parsedResult.extraFees
+                            }
                         }
                     }
+                    simulations.append(SimulatedFees(type: type, extraFees: operationExtraFees, consumedGas: consumedGas, consumedStorage: consumedStorage))
+                } else {
+                    return nil
                 }
-                simulations.append(SimulatedFees(type: type, extraFees: operationExtraFees, consumedGas: consumedGas, consumedStorage: consumedStorage))
-            } else {
-                return nil
             }
         }
         return SimulationResponse(simulations: simulations)
@@ -55,8 +57,10 @@ public struct TezosSimulationResponseParser {
         if let _ = results.allocated_destination_contract,let updates = results.balance_updates {
             if updates.count > 2 {
                 let update = updates[2]
-                let fee = update.change.replacingOccurrences(of: "-", with: "")
-                return AllocationFee(feeString: fee)
+                if let fee = update.change {
+                    let feeString = fee.replacingOccurrences(of: "-", with: "")
+                    return AllocationFee(feeString: feeString)
+                }
             }
         }
         return nil

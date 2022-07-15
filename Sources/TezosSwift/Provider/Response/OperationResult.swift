@@ -2,7 +2,7 @@
 
 import Foundation
 
-enum OperationResultStatus:Decodable {
+enum OperationResultStatus:Codable {
     case failed
     case backtracked
     case skipped
@@ -16,8 +16,6 @@ enum OperationResultStatus:Decodable {
     }
 }
 
-
-
 struct InternalOperationResult: Decodable {
     let kind:String
     let source:String
@@ -28,18 +26,18 @@ struct InternalOperationResult: Decodable {
 }
 
 struct OperationResult:Decodable {
-    let status:String?
-    let balance_updates:[OperationResultBalanceUpdates]?
-    let consumed_gas:String?
-    let consumed_milligas:String?
-    let allocated_destination_contract:[String:String]?
-    let paid_storage_size_diff:String?
+    var status:String
+    var balance_updates:[OperationResultBalanceUpdates]?
+    var consumed_gas:String
+    var consumed_milligas:String
+    var allocated_destination_contract:[String:String]?
+    var paid_storage_size_diff:String?
 }
 
 public struct OperationResultBalanceUpdates:Decodable {
-    var kind:String
-    var contract:String
-    var change:String
-    var origin:String
+    var kind:String?
+    var contract:String?
+    var change:String?
+    var origin:String?
 }
 
