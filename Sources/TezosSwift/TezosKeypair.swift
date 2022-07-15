@@ -117,7 +117,7 @@ extension TezosKeypair {
         guard let hash = try? Blake2.hash(.b2b, size: outputLength, bytes: messageBytes) else {
             return nil
         }
-        return Data(hash)
+        return hash
     }
 }
 
