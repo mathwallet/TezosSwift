@@ -159,7 +159,7 @@ public struct RunOperationURL:RPCURLRequest {
     public init(nodeUrl:String,operations:[TezosOperation],metadata:TezosBlockchainMetadata) {
         self.nodeUrl = nodeUrl
         self.parmaters = RunOperationParmater(operation: SignedRunOperationPayload(contents: operations, branch: metadata.blockHash, signature: defultSignature),
-                                              chain_id: metadata.chainId!)
+                                              chain_id: metadata.chainId)
     }
     public var RPCURLString:String {
         return nodeUrl + "/chains/main/blocks/head/helpers/scripts/run_operation"
