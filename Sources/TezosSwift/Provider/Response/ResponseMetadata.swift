@@ -2,6 +2,6 @@
 import Foundation
 
 struct ResponseMetadata:Codable {
-    let operation_result: OperationResult?
-    let internal_operation_results: [InternalOperationResult]?
+    var operation_result: OperationResult?
+    var internal_operation_results: [InternalOperationResult]?
 }
