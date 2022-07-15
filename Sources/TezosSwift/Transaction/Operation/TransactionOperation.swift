@@ -78,7 +78,7 @@ public class TransactionOperation:TezosOperation {
         try container.encode(String(operationFees.fee), forKey: .fee)
         try container.encode(amount, forKey: .amount)
         try container.encode(source, forKey: .source)
-        try container.encode(destination, forKey: .source)
+        try container.encode(destination, forKey: .destination)
         if let _parameters = parameters {
             try container.encode(_parameters, forKey: .parameters)
         }
