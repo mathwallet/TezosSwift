@@ -1,9 +1,4 @@
-//
-//  SimulationResponse.swift
-//  
-//
-//  Created by xgblin on 2022/7/6.
-//
+
 
 import Foundation
 

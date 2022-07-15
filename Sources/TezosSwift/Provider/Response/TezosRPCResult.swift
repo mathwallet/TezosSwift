@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import BeaconBlockchainTezos
 
 // MARK: ChainHead
 public struct GetChainHeadResult:Codable {
@@ -45,7 +44,7 @@ public struct FA1_2ResultData:Codable {
 // MARK: GET BALANCE FA2
 
 public struct FA2BalanceResult:Codable {
-    var data:[Micheline.Prim]?
+    var data:[TezosPrim]?
     public var balance:String {
         guard let prim = data?.first,let args = prim.args else {
             return ""
@@ -77,21 +76,25 @@ public struct TezosNetworkConstants:Codable {
 
 // MARK: Metadata
 public struct TezosBlockchainMetadata {
+    public var branch:String {
+        return blockHash
+    }
     public var blockHash: String
     public var protocolString: String
-    public var chainId: String?
+    public var chainId: String
     public var counter: Int
     public var key: String
     public var constants: TezosNetworkConstants
 }
 
-// MARK: SimulationResponse
-public struct TezosSimulationResult:Codable {
-    var contents:[TezosSimulationContent]?
+// MARK: transaction
+
+public struct PreappleOperationResult:Codable {
+    var contents:[PreappleOperationContent]?
     var signature:String?
 }
 
-public struct TezosSimulationContent:Codable {
+public struct PreappleOperationContent:Codable {
     var kind:String?
     var source:String?
     var fee:String?
@@ -100,47 +103,7 @@ public struct TezosSimulationContent:Codable {
     var storage_limit:String?
     var amount:String?
     var destination:String?
-    var metadata:TezosSimulationContentMetadata?
-}
-
-public struct TezosSimulationContentMetadata:Codable {
-    var operation_result:TezosSimulationMetadataOperation?
-    var internal_operation_results:[TezosSimulationMetadataInternal]?
-}
-
-public struct TezosSimulationMetadataOperation:Codable {
-    var status:String?
-    var balance_updates:[TezosSimulationOperationBalanceUpdate]?
-    var consumed_gas:String?
-    var consumed_milligas:String?
-    var allocated_destination_contract:[String:String]?
-    var paid_storage_size_diff:String?
-}
-
-public struct TezosSimulationOperationBalanceUpdate:Codable {
-    var kind:String?
-    var contract:String?
-    var change:String?
-    var origin:String?
-}
-// internal_operation_results
-public struct TezosSimulationMetadataInternal:Codable {
-    var kind:String?
-    var source:String?
-    var nonce:Int?
-    var amount:String?
-    var destination:String?
-    var result:TezosSimulationMetadataOperation?
-}
-
-// MARK: transaction
-
-public struct PreappleOperationResult:Codable {
-    var contents:[PreappleOperationContent]?
-}
-
-public struct PreappleOperationContent:Codable {
-    var metadata:TezosSimulationContentMetadata?
+    var metadata:ResponseMetadata?
 }
 
 // MARK: NFT
