@@ -1,7 +1,7 @@
 
 import Foundation
 
-struct OperationStatus:Codable {
+struct OperationStatus:Decodable {
     var kind:String?
     var source:String?
     var fee:String?

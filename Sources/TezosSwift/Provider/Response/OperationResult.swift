@@ -16,44 +16,30 @@ enum OperationResultStatus:Codable {
     }
 }
 
-enum OperationResultStatusValue: String, Codable {
-    case failed
-    case applied
-}
 
-public enum OperationErrorKind: String, Codable {
-    case temporary
-    case branch
-    case permanent
-}
-
-public struct PreapplyError: Codable {
-    public let kind: OperationErrorKind
-    public let id: String
-}
 
 struct InternalOperationResult: Codable {
-    var kind:String?
-    var source:String?
-    var nonce:Int?
-    var amount:String?
-    var destination:String?
+    let kind:String
+    let source:String
+    let nonce:Int
+    let amount:String
+    let destination:String
     let result: OperationResult?
 }
 
 struct OperationResult:Codable {
-    var status:String?
-    var balance_updates:[OperationResultBalanceUpdates]?
-    var consumed_gas:String?
-    var consumed_milligas:String?
-    var allocated_destination_contract:[String:String]?
-    var paid_storage_size_diff:String?
+    let status:String?
+    let balance_updates:[OperationResultBalanceUpdates]?
+    let consumed_gas:String?
+    let consumed_milligas:String?
+    let allocated_destination_contract:[String:String]?
+    let paid_storage_size_diff:String?
 }
 
 public struct OperationResultBalanceUpdates:Codable {
-    var kind:String?
-    var contract:String?
-    var change:String?
-    var origin:String?
+    var kind:String
+    var contract:String
+    var change:String
+    var origin:String
 }
 
