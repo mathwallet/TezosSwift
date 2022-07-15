@@ -2,13 +2,13 @@
 import Foundation
 
 struct OperationStatus:Decodable {
-    var kind:String?
-    var source:String?
-    var fee:String?
-    var counter:String?
-    var gas_limit:String?
-    var storage_limit:String?
-    var amount:String?
-    var destination:String?
-    var metadata: ResponseMetadata?
+    let kind:String
+    let source:String
+    let fee:String
+    let counter:String
+    let gas_limit:String
+    let storage_limit:String
+    let amount:String
+    let destination:String
+    let metadata: ResponseMetadata?
 }
