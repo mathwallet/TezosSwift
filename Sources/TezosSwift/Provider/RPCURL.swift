@@ -156,7 +156,7 @@ public struct RunOperationURL:RPCURLRequest {
     let nodeUrl:String
     public var parmaters:Encodable?
     
-    public init(nodeUrl:String,operations:[TransactionOperation],metadata:TezosBlockchainMetadata) {
+    public init(nodeUrl:String,operations:[TezosOperation],metadata:TezosBlockchainMetadata) {
         self.nodeUrl = nodeUrl
         self.parmaters = RunOperationParmater(operation: SignedRunOperationPayload(contents: operations, branch: metadata.blockHash, signature: defultSignature),
                                               chain_id: metadata.chainId!)
@@ -171,7 +171,7 @@ public struct ForgeURL:RPCURLRequest {
     let headHash:String
     public var parmaters:Encodable?
     
-    init(nodeUrl:String,headHash:String,operations:[TransactionOperation],branch:String) {
+    init(nodeUrl:String,headHash:String,operations:[TezosOperation],branch:String) {
         self.nodeUrl = nodeUrl
         self.headHash = headHash
         self.parmaters = ForgeURLParmaster(contents: operations, branch: branch)
@@ -187,7 +187,7 @@ public struct PreapplyOperationURL:RPCURLRequest {
     let branch:String
     public var parmaters:Encodable?
     
-    init(nodeUrl:String,branch:String,operations:[TransactionOperation], protocolString: String, signature: String) {
+    init(nodeUrl:String,branch:String,operations:[TezosOperation], protocolString: String, signature: String) {
         self.nodeUrl = nodeUrl
         self.branch = branch
         self.parmaters = [SignedOperationPayload(contents: operations, branch: branch, protocol: protocolString, signature: signature)]

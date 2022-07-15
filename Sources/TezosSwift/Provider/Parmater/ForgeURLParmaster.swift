@@ -8,6 +8,6 @@
 import Foundation
 
 public struct ForgeURLParmaster:Encodable {
-    public let contents: [TransactionOperation]
+    public let contents: [TezosOperation]
     public let branch: String
 }

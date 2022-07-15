@@ -77,32 +77,7 @@ public struct TezosSimulationResponseParser {
         }
         return nil
     }
-    
-    private func parseAllocationFee(results: InternalOperationResultStatus) -> ExtraFee? {
-        if let _ = results.allocated_destination_contract,let updates = results.balance_updates {
-            if updates.count > 2 {
-                let update = updates[2]
-                if let value = update.change {
-                    let fee = value.replacingOccurrences(of: "-", with: "")
-                    return AllocationFee(feeString: fee)
-                }
-            }
-        }
-        return nil
-    }
-    
-    
-    
-    private func parseBurnFee(results: InternalOperationResultStatus) -> ExtraFee? {
-        if let sizeDiffString = results.paid_storage_size_diff,let sizeDiff = Double(sizeDiffString) {
-            if sizeDiff > 0 {
-                let burn = sizeDiff * (Double(constants.cost_per_byte!) ?? 0)
-                return BurnFee(feeString: String(burn))
-            }
-        }
-        return nil
-    }
-    
+
     private func parseInternalOperationResult(internalResult:InternalOperationResult) -> ParseInternalOperationResult? {
         
         if let result = internalResult.result {

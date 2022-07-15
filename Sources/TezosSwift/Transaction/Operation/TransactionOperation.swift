@@ -1,7 +1,7 @@
 import Foundation
 
 public let defultoperationFees = OperationFees(fee: 0, gasLimit: MAXGAS, storageLimit: MAXSTORAGE)
-public class TransactionOperation:Encodable {
+public class TransactionOperation:TezosOperation {
     var kind:TezosOperationKind
     var source:String
     var destination:String
@@ -27,6 +27,7 @@ public class TransactionOperation:Encodable {
         self.kind = kind
         self.operationFees = operationFees ?? defultoperationFees
         self.parameters = parameters
+        super.init()
     }
     
     //Fa1.2
@@ -38,6 +39,7 @@ public class TransactionOperation:Encodable {
         self.amount = "0"
         self.kind = kind
         self.operationFees = operationFees ?? defultoperationFees
+        super.init()
         self.parameters = self.createFa1_2Parameters(from:from, to: to, amount: amount)
     }
     
@@ -49,9 +51,37 @@ public class TransactionOperation:Encodable {
         self.kind = kind
         self.amount = "0"
         self.operationFees = operationFees ?? defultoperationFees
+        super.init()
         self.parameters = self.createFa2Parameters(from:from, to: to, amount: amount,tokenId: tokenId)
     }
     
+    
+    private enum OperationKeys: String, CodingKey {
+        case kind = "kind"
+        case counter = "counter"
+        case storageLimit = "storage_limit"
+        case gasLimit = "gas_limit"
+        case fee = "fee"
+        case destination = "destination"
+        case amount = "amount"
+        case source = "source"
+        case parameters = "parameters"
+    }
+    
+    public override func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: OperationKeys.self)
+        try container.encode(kind.rawValue, forKey: .kind)
+        try container.encode(String(counter), forKey: .counter)
+        let operationFees = self.operationFees
+        try container.encode(String(operationFees.storageLimit), forKey: .storageLimit)
+        try container.encode(String(operationFees.gasLimit), forKey: .gasLimit)
+        try container.encode(String(operationFees.fee), forKey: .fee)
+        try container.encode(amount, forKey: .amount)
+        try container.encode(source, forKey: .source)
+        try container.encode(destination, forKey: .source)
+        try container.encode(parameters, forKey: .parameters)
+    }
+
 
 }
 // createParameters
@@ -77,35 +107,6 @@ extension TransactionOperation {
         let valuePrim = TezosPrim(prim: "Pair", args:fromArgs)
         
         return TezosParameters(entrypoint: TezosParameters.Entrypoint.custom("transfer"), value: TezosArg.sequence([TezosArg.prim(valuePrim)]))
-    }
-}
-
-//encode
-extension TransactionOperation {
-    private enum OperationKeys: String, CodingKey {
-        case kind = "kind"
-        case counter = "counter"
-        case storageLimit = "storage_limit"
-        case gasLimit = "gas_limit"
-        case fee = "fee"
-        case destination = "destination"
-        case amount = "amount"
-        case source = "source"
-        case parameters = "parameters"
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: OperationKeys.self)
-        try container.encode(kind.rawValue, forKey: .kind)
-        try container.encode(String(counter), forKey: .counter)
-        let operationFees = self.operationFees
-        try container.encode(String(operationFees.storageLimit), forKey: .storageLimit)
-        try container.encode(String(operationFees.gasLimit), forKey: .gasLimit)
-        try container.encode(String(operationFees.fee), forKey: .fee)
-        try container.encode(amount, forKey: .amount)
-        try container.encode(source, forKey: .source)
-        try container.encode(destination, forKey: .source)
-        try container.encode(parameters, forKey: .parameters)
     }
 }
 

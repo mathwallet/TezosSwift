@@ -38,16 +38,7 @@ struct InternalOperationResult: Codable {
     var nonce:Int?
     var amount:String?
     var destination:String?
-    let result: InternalOperationResultStatus?
-}
-
-struct InternalOperationResultStatus: Codable {
-    var status:String?
-    var balance_updates:[OperationResultBalanceUpdates]?
-    var consumed_gas:String?
-    var consumed_milligas:String?
-    var allocated_destination_contract:[String:String]?
-    var paid_storage_size_diff:String?
+    let result: OperationResult?
 }
 
 struct OperationResult:Codable {

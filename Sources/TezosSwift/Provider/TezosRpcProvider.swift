@@ -83,7 +83,7 @@ extension  TezosRpcProvider {
         }
     }
     
-    public func getSimulationResponse(operations:[TransactionOperation],metadata:TezosBlockchainMetadata) -> Promise<SimulationResponse> {
+    public func getSimulationResponse(operations:[TezosOperation],metadata:TezosBlockchainMetadata) -> Promise<SimulationResponse> {
         return Promise<SimulationResponse> { seal in
             let request = RunOperationURL(nodeUrl: nodeUrl, operations: operations, metadata: metadata)
             POST(request: request).done { (result:OperationContents) in
@@ -99,7 +99,7 @@ extension  TezosRpcProvider {
         }
     }
     
-    public func forge(branch:String,operations:[TransactionOperation]) -> Promise<String> {
+    public func forge(branch:String,operations:[TezosOperation]) -> Promise<String> {
         return Promise<String> {seal in
             getHeadHash().then{ (headHash:String) -> Promise<String> in
                 let request = ForgeURL(nodeUrl: nodeUrl, headHash:headHash , operations: operations, branch: branch)
@@ -130,16 +130,16 @@ extension TezosRpcProvider {
         }
     }
     
-    func calculateFees(operations:[TransactionOperation],metadata:TezosBlockchainMetadata) -> Promise<[TransactionOperation]> {
-        return Promise<[TransactionOperation]> {seal in
+    func calculateFees(operations:[TezosOperation],metadata:TezosBlockchainMetadata) -> Promise<[TezosOperation]> {
+        return Promise<[TezosOperation]> {seal in
             DispatchQueue.global(qos: .userInitiated).async {
                 do {
                     let response = try getSimulationResponse(operations: operations, metadata: metadata).wait()
                     let forgeResult = try forge(branch: metadata.branch, operations: operations).wait()
                     let service = TezosFeeEstimatorService()
-                    var haveFeeOperations = [TransactionOperation]()
+                    var haveFeeOperations = [TezosOperation]()
                     operations.forEach { operation in
-                        let haveFeeOperation = service.calculateFeesAndCreateOperation(response: response, operation: operation, operationSize: service.getForgedOperationsSize(forgeResult: forgeResult))
+                        let haveFeeOperation = service.calculateFeesAndCreateOperation(response: response, operation: operation as! TransactionOperation, operationSize: service.getForgedOperationsSize(forgeResult: forgeResult))
                         haveFeeOperations.append(haveFeeOperation)
                     }
                     seal.fulfill(haveFeeOperations)
@@ -286,69 +286,70 @@ extension  TezosRpcProvider {
     }
 }
 
-extension TezosRpcProvider {
-    
-    func sendRequest<T:Codable>(request:RPCURLRequest,method:HTTPMethod = .get) -> Promise<T> {
-        return Promise<T> {seal in
-            var task:URLSessionTask? = nil
-            DispatchQueue.main.async {
-                do {
-                    guard let urlRequest = try self.configUrlRequest(request: request, method: method) else {
-                        seal.reject(TezosRpcProviderError.server(message: "Wrong parmaters"))
-                        return
-                    }
-                    task = self.session.dataTask(with: urlRequest) { (data, response, error) in
-                        guard error == nil else {
-                            seal.reject(error!)
-                            return
-                        }
-                        guard data != nil else {
-                            seal.reject(TezosRpcProviderError.server(message: "Node response is empty"))
-                            return
-                        }
-                        if let result = try? JSONDecoder().decode(T.self, from: data!) {
-                            seal.fulfill(result)
-                        }
-                    }
-                    task?.resume()
-                } catch let error {
-                    seal.reject(error)
-                }
-            }
-        }
-    }
-    
-    func configUrlRequest(request:RPCURLRequest,method:HTTPMethod) throws -> URLRequest?{
-        guard let url = URL(string: request.RPCURLString) else { return nil }
-        var urlRequest = URLRequest(url: url)
-        if method == .post {
-            guard let payload = request.parmaters else {
-                throw TezosRpcProviderError.server(message: "parameter error")
-            }
-            do {
-                urlRequest.httpMethod = "POST"
-                urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
-                let jsonData: Data
-                if let stringPayload = payload as? String, let stringData = stringPayload.data(using: .utf8) {
-                    jsonData = stringData
-                } else {
-                    jsonData = try payload.toJSONData()
-                }
-                urlRequest.httpBody = jsonData
-            }
-            catch {
-                throw TezosRpcProviderError.server(message: "parameter error")
-            }
-        }
-        return urlRequest
-    }
-}
+//extension TezosRpcProvider {
+//
+//    func sendRequest<T:Codable>(request:RPCURLRequest,method:HTTPMethod = .get) -> Promise<T> {
+//        return Promise<T> {seal in
+//            var task:URLSessionTask? = nil
+//            DispatchQueue.main.async {
+//                do {
+//                    guard let urlRequest = try self.configUrlRequest(request: request, method: method) else {
+//                        seal.reject(TezosRpcProviderError.server(message: "Wrong parmaters"))
+//                        return
+//                    }
+//                    task = self.session.dataTask(with: urlRequest) { (data, response, error) in
+//                        guard error == nil else {
+//                            seal.reject(error!)
+//                            return
+//                        }
+//                        guard data != nil else {
+//                            seal.reject(TezosRpcProviderError.server(message: "Node response is empty"))
+//                            return
+//                        }
+//                        if let result = try? JSONDecoder().decode(T.self, from: data!) {
+//                            seal.fulfill(result)
+//                        }
+//                    }
+//                    task?.resume()
+//                } catch let error {
+//                    seal.reject(error)
+//                }
+//            }
+//        }
+//    }
+//
+//    func configUrlRequest(request:RPCURLRequest,method:HTTPMethod) throws -> URLRequest?{
+//        guard let url = URL(string: request.RPCURLString) else { return nil }
+//        var urlRequest = URLRequest(url: url)
+//        if method == .post {
+//            guard let payload = request.parmaters else {
+//                throw TezosRpcProviderError.server(message: "parameter error")
+//            }
+//            do {
+//                urlRequest.httpMethod = "POST"
+//                urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//                urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+//                let jsonData: Data
+//                if let stringPayload = payload as? String, let stringData = stringPayload.data(using: .utf8) {
+//                    jsonData = stringData
+//                } else {
+//                    jsonData = try payload.toJSONData()
+//                }
+//                urlRequest.httpBody = jsonData
+//            }
+//            catch {
+//                throw TezosRpcProviderError.server(message: "parameter error")
+//            }
+//        }
+//        return urlRequest
+//    }
+//}
 
 extension TezosRpcProvider {
-     public func GET<T: Codable>(request:RPCURLRequest, queue: DispatchQueue = .main) -> Promise<T> {
+     public func GET<T: Codable>(request:RPCURLRequest, queue: DispatchQueue = DispatchQueue.main) -> Promise<T> {
         let rp = Promise<Data>.pending()
         var task: URLSessionTask? = nil
+        
         queue.async {
             let url = URL(string: request.RPCURLString)
             var urlRequest = URLRequest(url: url!, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData)
@@ -383,7 +384,7 @@ extension TezosRpcProvider {
             }
     }
 
-    public func POST<T: Decodable>(request:RPCURLRequest, queue: DispatchQueue = .main) -> Promise<T> {
+    public func POST<T: Decodable>(request:RPCURLRequest, queue: DispatchQueue = DispatchQueue.main) -> Promise<T> {
         let rp = Promise<Data>.pending()
         var task: URLSessionTask? = nil
         queue.async {

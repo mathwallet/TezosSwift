@@ -13,7 +13,7 @@ import BigInt
 public class TezosTransaction {
 
     public var metadata:TezosBlockchainMetadata
-    public var operations = [TransactionOperation]()
+    public var operations = [TezosOperation]()
     
     public var forgeString:String?
     public var signatureString:String?
@@ -35,7 +35,7 @@ public class TezosTransaction {
         self.metadata = metadata
     }
     
-    public func addOperation(_ operation:TransactionOperation) {
+    public func addOperation(_ operation:TezosOperation) {
         self.operations.append(operation)
     }
     
@@ -43,7 +43,7 @@ public class TezosTransaction {
         self.operations.removeAll()
     }
     
-    public func configOperations(operations:[TransactionOperation]) {
+    public func configOperations(operations:[TezosOperation]) {
         self.operations.removeAll()
         self.operations.append(contentsOf: operations)
     }

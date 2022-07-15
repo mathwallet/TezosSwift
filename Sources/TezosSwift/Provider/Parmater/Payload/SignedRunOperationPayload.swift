@@ -3,14 +3,14 @@ public let defultSignature = "edsigtkpiSSschcaCt9pUVrpNPf7TTcgvgDEDD6NCEHMy8NNQJ
 
 /// Signed operation's data
 public struct SignedRunOperationPayload: Encodable {
-    public var contents: [TransactionOperation]
+    public var contents: [TezosOperation]
     public let branch: String
     public let signature: String
 
-    public init(contents: [TransactionOperation], branch: String, signature: String = defultSignature) {
+    public init(contents: [TezosOperation], branch: String, signature: String = defultSignature) {
         self.contents = contents
         self.branch = branch
         self.signature = signature 
     }
 }
-
+ 
