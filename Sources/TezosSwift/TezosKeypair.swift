@@ -96,11 +96,14 @@ public struct TezosKeypair {
 
 extension TezosKeypair {
     public func signDigest(messageDigest: Data) throws -> Data {
-        return try NaclSign.sign(message: messageDigest, secretKey: secretKey)
+        return try NaclSign.signDetached(message: messageDigest, secretKey: secretKey)
     }
     
-    public func verifyPublickey(message: Data, signature: Data) -> Bool {
-        return (try? NaclSign.signDetachedVerify(message: message, sig: signature, publicKey: publicKey)) ?? false
+    public func signVerify(messageDigest: Data, signature: Data) -> Bool {
+        guard let ret = try? NaclSign.signDetachedVerify(message: messageDigest, sig: signature, publicKey: publicKey) else {
+            return false
+        }
+        return ret
     }
 }
 
