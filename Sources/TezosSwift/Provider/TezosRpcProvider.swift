@@ -76,7 +76,7 @@ extension  TezosRpcProvider {
                     let blocksHead = try getBlocksHead().wait()
                     let managerKey = try getManagerKey(address: address).wait()
                     let constants = try getConstants().wait()
-                    seal.fulfill(TezosBlockchainMetadata(blockHash: blocksHead.hash ?? "", protocolString: blocksHead.protocolString ?? "", counter: (Int(counter) ?? 0) + 1, key:managerKey, constants: constants))
+                    seal.fulfill(TezosBlockchainMetadata(blockHash: blocksHead.hash ?? "", protocolString: blocksHead.protocolString ?? "",chainId:blocksHead.chain_id ?? "" ,counter: (Int(counter) ?? 0) + 1, key:managerKey, constants: constants))
                 } catch let error {
                     seal.reject(error)
                 }

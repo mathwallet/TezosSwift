@@ -81,7 +81,7 @@ public struct TezosBlockchainMetadata {
     }
     public var blockHash: String
     public var protocolString: String
-    public var chainId: String?
+    public var chainId: String
     public var counter: Int
     public var key: String
     public var constants: TezosNetworkConstants
