@@ -286,35 +286,44 @@ extension  TezosRpcProvider {
 extension TezosRpcProvider {
     
     func sendRequest<T:Codable>(request:RPCURLRequest,method:HTTPMethod = .get) -> Promise<T> {
-        return Promise<T> { seal in
-            DispatchQueue.main.async {
-                do {
-                    let config = URLSessionConfiguration.default
-                    let urlSession = URLSession(configuration: config)
-                    guard let urlRequest = try self.configUrlRequest(request: request, method: method) else {
-                        seal.reject(TezosRpcProviderError.server(message: "Wrong parmaters"))
+        let rp = Promise<Data>.pending()
+        var task:URLSessionTask? = nil
+        let queue = DispatchQueue.main
+        queue.async {
+            do {
+                let config = URLSessionConfiguration.default
+                let urlSession = URLSession(configuration: config)
+                guard let urlRequest = try self.configUrlRequest(request: request, method: method) else {
+                    rp.resolver.reject(TezosRpcProviderError.server(message: "Wrong parmaters"))
+                    return
+                }
+                task = urlSession.dataTask(with: urlRequest) { (data, response, error) in
+                    guard error == nil else {
+                        rp.resolver.reject(error!)
                         return
                     }
-                    let task = urlSession.dataTask(with: urlRequest) { (data, response, error) in
-                        guard error == nil else {
-                            seal.reject(error!)
-                            return
-                        }
-                        guard data != nil else {
-                            seal.reject(TezosRpcProviderError.server(message: "Node response is empty"))
-                            return
-                        }
-                        if let resp = try? JSONDecoder().decode(T.self, from: data!) {
-                            seal.fulfill(resp)
-                        } else {
-                            seal.reject(TezosRpcProviderError.server(message: "Result decode error"))
-                        }
+                    guard data != nil else {
+                        rp.resolver.reject(TezosRpcProviderError.server(message: "Node response is empty"))
+                        return
                     }
-                    task.resume()
-                } catch let error {
-                    seal.reject(error)
                 }
+                task?.resume()
+            } catch let error {
+                rp.resolver.reject(error)
             }
+        }
+        
+        return rp.promise.ensure(on: queue) {
+            task = nil
+        }.map { (data:Data) in
+            if let errResp = try? JSONDecoder().decode(TezosWebResponse.Error.self, from: data) {
+                throw TezosRpcProviderError.server(message: errResp.error)
+            }
+            
+            if let resp = try? JSONDecoder().decode(T.self, from: data) {
+                return resp
+            }
+            throw TezosRpcProviderError.server(message: "Received an error message from node")
         }
     }
 
@@ -365,6 +374,16 @@ public enum TezosRpcProviderError: LocalizedError {
             return message
         default:
             return "Unknown error"
+        }
+    }
+}
+
+public struct TezosWebResponse {
+    public struct Error: Decodable {
+        public var error: String
+        
+        enum CodingKeys: String, CodingKey {
+            case error = "Error"
         }
     }
 }
