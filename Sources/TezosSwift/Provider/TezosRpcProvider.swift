@@ -291,29 +291,31 @@ extension TezosRpcProvider {
     func sendRequest<T:Codable>(request:RPCURLRequest,method:HTTPMethod = .get) -> Promise<T> {
         return Promise<T> {seal in
             var task:URLSessionTask? = nil
-            do {
-                let config = URLSessionConfiguration.default
-                let urlSession = URLSession(configuration: config)
-                guard let urlRequest = try self.configUrlRequest(request: request, method: method) else {
-                    seal.reject(TezosRpcProviderError.server(message: "Wrong parmaters"))
-                    return
-                }
-                task = self.session.dataTask(with: urlRequest) { (data, response, error) in
-                    guard error == nil else {
-                        seal.reject(error!)
+            DispatchQueue.main.async {
+                do {
+                    let config = URLSessionConfiguration.default
+                    let urlSession = URLSession(configuration: config)
+                    guard let urlRequest = try self.configUrlRequest(request: request, method: method) else {
+                        seal.reject(TezosRpcProviderError.server(message: "Wrong parmaters"))
                         return
                     }
-                    guard data != nil else {
-                        seal.reject(TezosRpcProviderError.server(message: "Node response is empty"))
-                        return
+                    task = self.session.dataTask(with: urlRequest) { (data, response, error) in
+                        guard error == nil else {
+                            seal.reject(error!)
+                            return
+                        }
+                        guard data != nil else {
+                            seal.reject(TezosRpcProviderError.server(message: "Node response is empty"))
+                            return
+                        }
+                        if let result = try? JSONDecoder().decode(T.self, from: data!) {
+                            seal.fulfill(result)
+                        }
                     }
-                    if let result = try? JSONDecoder().decode(T.self, from: data!) {
-                        seal.fulfill(result)
-                    }
+                    task?.resume()
+                } catch let error {
+                    seal.reject(error)
                 }
-                task?.resume()
-            } catch let error {
-                seal.reject(error)
             }
         }
     }
