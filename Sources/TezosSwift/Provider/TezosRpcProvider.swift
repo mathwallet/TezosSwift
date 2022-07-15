@@ -11,7 +11,7 @@ import CryptoSwift
 
 public struct TezosRpcProvider {
     public var nodeUrl:String
-    private var session:URLSession
+    public var session:URLSession
     public init(nodeUrl: String) {
         self.nodeUrl = nodeUrl
         let config = URLSessionConfiguration.default
@@ -21,7 +21,7 @@ public struct TezosRpcProvider {
     
     public func getXTZBalance(address:String) -> Promise<String> {
         return Promise<String> { seal in
-            sendRequest(request: GetBalanceURL(nodeUrl: self.nodeUrl, address: address)).done { (result:String) in
+            GET(request: GetBalanceURL(nodeUrl: self.nodeUrl, address: address)).done { (result:String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -31,8 +31,8 @@ public struct TezosRpcProvider {
     
     public func getFa1_2TokenBalancee(address:String,mint:String,chainId:String) -> Promise<String> {
         return Promise { seal in
-            let requestParmer = RunViewURL(nodeUrl: nodeUrl, input: TezosArg.literal(.string(address)), chainId: chainId, mint: mint, entrypoint: "getBalance")
-            sendRequest(request: requestParmer, method: .post).done { (result:FA1_2BalanceResult) in
+            let request = RunViewURL(nodeUrl: nodeUrl, input: TezosArg.literal(.string(address)), chainId: chainId, mint: mint, entrypoint: "getBalance")
+            POST(request: request).done { (result:FA1_2BalanceResult) in
                 seal.fulfill(result.balance)
             }.catch { error in
                 seal.reject(error)
@@ -44,8 +44,8 @@ public struct TezosRpcProvider {
         return Promise<String> { seal in
             let prim = TezosPrim(prim: "Pair", args: [TezosArg.literal(.string(address)),TezosArg.literal(.int(tokenId))])
             let input = TezosArg.prim(prim)
-            let requestParmer = RunViewURL(nodeUrl: nodeUrl, input: input, chainId: chainId, mint: contract, entrypoint: "balance_of")
-            sendRequest(request: requestParmer, method: .post).done { (result:FA2BalanceResult) in
+            let request = RunViewURL(nodeUrl: nodeUrl, input: input, chainId: chainId, mint: contract, entrypoint: "balance_of")
+            POST(request: request).done { (result:FA2BalanceResult) in
                 seal.fulfill(result.balance)
             }.catch { error in
                 seal.reject(error)
@@ -55,7 +55,7 @@ public struct TezosRpcProvider {
     
     public func getNfts(address:String) -> Promise<[TezosNFTResult]> {
         return Promise<[TezosNFTResult]> {seal in
-            sendRequest(request: GetNFTURL(address: address, limit:"1000")).done { (results:Array<TezosNFTResult>) in
+            GET(request: GetNFTURL(address: address, limit:"1000")).done { (results:Array<TezosNFTResult>) in
                 seal.fulfill(results)
             }.catch { error in
                 seal.reject(error)
@@ -86,7 +86,7 @@ extension  TezosRpcProvider {
     public func getSimulationResponse(operations:[TransactionOperation],metadata:TezosBlockchainMetadata) -> Promise<SimulationResponse> {
         return Promise<SimulationResponse> { seal in
             let request = RunOperationURL(nodeUrl: nodeUrl, operations: operations, metadata: metadata)
-            sendRequest(request: request,method: .post).done { (result:OperationContents) in
+            POST(request: request).done { (result:OperationContents) in
                 let parser = TezosSimulationResponseParser(constants: metadata.constants)
                 if let responseResult = parser.parseSimulation(result: result) {
                     seal.fulfill(responseResult)
@@ -103,7 +103,7 @@ extension  TezosRpcProvider {
         return Promise<String> {seal in
             getHeadHash().then{ (headHash:String) -> Promise<String> in
                 let request = ForgeURL(nodeUrl: nodeUrl, headHash:headHash , operations: operations, branch: branch)
-                return sendRequest(request: request, method: .post)
+                return POST(request: request)
             }.done { forgeString in
                 seal.fulfill(forgeString)
             }.catch { error in
@@ -179,7 +179,7 @@ extension  TezosRpcProvider {
         return Promise<Bool> {seal in
             if let _signature = transaction.signatureString {
                 let request = PreapplyOperationURL(nodeUrl: nodeUrl, branch: transaction.branch, operations: transaction.operations, protocolString: transaction.protocolString, signature:_signature)
-                sendRequest(request: request, method: .post).done { (results:PreappleOperationResult) in
+                POST(request: request).done { (results:PreappleOperationResult) in
                     let isSuccess = TezosPreapplyResponseParser.parse(results: results)
                     seal.fulfill(isSuccess)
                 }.catch { error in
@@ -194,7 +194,7 @@ extension  TezosRpcProvider {
     func injectOperation(sendString:String) -> Promise<String> {
         return Promise<String> { seal in
             let request = InjectOperationURL(nodeUrl: nodeUrl, sendString: sendString)
-            sendRequest(request: request,method: .post).done { (result:String) in
+            POST(request: request).done { (result:String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -207,7 +207,7 @@ extension  TezosRpcProvider {
 extension  TezosRpcProvider {
     public func getChainID() -> Promise<String> {
         return Promise<String> {seal in
-            sendRequest(request: GetChainIDURL(nodeUrl: nodeUrl)).done { (result:String) in
+            GET(request: GetChainIDURL(nodeUrl: nodeUrl)).done { (result:String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -217,7 +217,7 @@ extension  TezosRpcProvider {
     
     public func getHeadHash() -> Promise<String> {
         return Promise<String> {seal in
-            sendRequest(request: GetHeadHashURL(nodeUrl: nodeUrl)).done { (result:String) in
+            GET(request: GetHeadHashURL(nodeUrl: nodeUrl)).done { (result:String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -227,7 +227,7 @@ extension  TezosRpcProvider {
     
     public func getHeadHeader() -> Promise<Int> {
         return Promise<Int> {seal in
-            sendRequest(request: GetHeadHeader(nodeUrl: nodeUrl)).done { (result:GetHeadHeaderResult) in
+            GET(request: GetHeadHeader(nodeUrl: nodeUrl)).done { (result:GetHeadHeaderResult) in
                 seal.fulfill(result.level ?? 0)
             }.catch { error in
                 seal.reject(error)
@@ -237,7 +237,7 @@ extension  TezosRpcProvider {
     
     public func getNetworkConstants() -> Promise<String> {
         return Promise<String> {seal in
-            sendRequest(request: GetNetworkConstantsURL(nodeUrl: nodeUrl)).done { (result:String) in
+            GET(request: GetNetworkConstantsURL(nodeUrl: nodeUrl)).done { (result:String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -247,7 +247,7 @@ extension  TezosRpcProvider {
     
     public func getManagerKey(address:String) -> Promise<String> {
         return Promise<String> {seal in
-            sendRequest(request: GetManagerKeyURL(nodeUrl: nodeUrl,address: address)).done { (result:String) in
+            GET(request: GetManagerKeyURL(nodeUrl: nodeUrl,address: address)).done { (result:String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -257,7 +257,7 @@ extension  TezosRpcProvider {
     
     public func getCounter(address:String) -> Promise<String> {
         return Promise<String> {seal in
-            sendRequest(request: GetCounterURL(nodeUrl: nodeUrl,address: address)).done { (result:String) in
+            GET(request: GetCounterURL(nodeUrl: nodeUrl,address: address)).done { (result:String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -267,7 +267,7 @@ extension  TezosRpcProvider {
     
     public func getBlocksHead() -> Promise<GetChainHeadResult> {
         return Promise<GetChainHeadResult> {seal in
-            sendRequest(request: GetBlockHeadURL(nodeUrl: nodeUrl)).done { (result:GetChainHeadResult) in
+            GET(request: GetBlockHeadURL(nodeUrl: nodeUrl)).done { (result:GetChainHeadResult) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -277,7 +277,7 @@ extension  TezosRpcProvider {
     
     public func getConstants()-> Promise<TezosNetworkConstants> {
         return Promise<TezosNetworkConstants> {seal in
-            sendRequest(request: GetNetworkConstantsURL(nodeUrl: nodeUrl)).done { (result:TezosNetworkConstants) in
+            GET(request: GetNetworkConstantsURL(nodeUrl: nodeUrl)).done { (result:TezosNetworkConstants) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -293,8 +293,6 @@ extension TezosRpcProvider {
             var task:URLSessionTask? = nil
             DispatchQueue.main.async {
                 do {
-                    let config = URLSessionConfiguration.default
-                    let urlSession = URLSession(configuration: config)
                     guard let urlRequest = try self.configUrlRequest(request: request, method: method) else {
                         seal.reject(TezosRpcProviderError.server(message: "Wrong parmaters"))
                         return
@@ -347,91 +345,92 @@ extension TezosRpcProvider {
     }
 }
 
-//extension TezosRpcProvider {
-//    static func GET<T: Codable>(request:RPCURLRequest, queue: DispatchQueue = .main, session: URLSession) -> Promise<K> {
-//        let rp = Promise<Data>.pending()
-//        var task: URLSessionTask? = nil
-//        queue.async {
-//            let url = URL(string: request.RPCURLString)
-//            var urlRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData)
-//            urlRequest.httpMethod = "GET"
-//            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//            urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
-//
-//            task = session.dataTask(with: urlRequest){ (data, response, error) in
-//                guard error == nil else {
-//                    rp.resolver.reject(error!)
-//                    return
-//                }
-//                guard data != nil else {
-//                    rp.resolver.reject(TronWebError.nodeError(desc: "Node response is empty"))
-//                    return
-//                }
-//                rp.resolver.fulfill(data!)
-//            }
-//            task?.resume()
-//        }
-//        return rp.promise.ensure(on: queue) {
-//                task = nil
-//            }.map(on: queue){ (data: Data) throws -> K in
-//                if let errResp = try? JSONDecoder().decode(TezosWebResponse.Error.self, from: data) {
-//                    throw TezosRpcProviderError.server(message: errResp)
-//                }
-//
-//                if let resp = try? JSONDecoder().decode(K.self, from: data) {
-//                    return resp
-//                }
-//                throw TronWebError.nodeError(desc: "Received an error message from node")
-//            }
-//    }
-//
-//    static func POST<K: Decodable>(request:RPCURLRequest, providerURL: URL, queue: DispatchQueue = .main, session: URLSession) -> Promise<K> {
-//        let rp = Promise<Data>.pending()
-//        var task: URLSessionTask? = nil
-//        queue.async {
-//            do {
-////                debugPrint("POST \(providerURL)")
-//                var urlRequest = URLRequest(url: providerURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData)
-//                urlRequest.httpMethod = "POST"
-//                urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-//                urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
-//                if let p = parameters {
-//                    urlRequest.httpBody = try JSONSerialization.data(withJSONObject: p, options: .fragmentsAllowed)
-////                    debugPrint(p)
-//                }
-//
-//                task = session.dataTask(with: urlRequest){ (data, response, error) in
-//                    guard error == nil else {
-//                        rp.resolver.reject(error!)
-//                        return
-//                    }
-//                    guard data != nil else {
-//                        rp.resolver.reject(TronWebError.nodeError(desc: "Node response is empty"))
-//                        return
-//                    }
-//                    rp.resolver.fulfill(data!)
-//                }
-//                task?.resume()
-//            } catch {
-//                rp.resolver.reject(error)
-//            }
-//        }
-//        return rp.promise.ensure(on: queue) {
-//                task = nil
-//            }.map(on: queue){ (data: Data) throws -> K in
-////                debugPrint(String(data: data, encoding: .utf8) ?? "")
-//
-//                if let errResp = try? JSONDecoder().decode(TezosWebResponse.Error.self, from: data) {
-//                    throw TronWebError.processingError(desc: errResp.error)
-//                }
-//
-//                if let resp = try? JSONDecoder().decode(K.self, from: data) {
-//                    return resp
-//                }
-//                throw TronWebError.nodeError(desc: "Received an error message from node")
-//            }
-//    }
-//}
+extension TezosRpcProvider {
+     public func GET<T: Codable>(request:RPCURLRequest, queue: DispatchQueue = .main) -> Promise<T> {
+        let rp = Promise<Data>.pending()
+        var task: URLSessionTask? = nil
+        queue.async {
+            let url = URL(string: request.RPCURLString)
+            var urlRequest = URLRequest(url: url!, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData)
+            urlRequest.httpMethod = "GET"
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+
+            task = self.session.dataTask(with: urlRequest){ (data, response, error) in
+                guard error == nil else {
+                    rp.resolver.reject(error!)
+                    return
+                }
+                guard data != nil else {
+                    rp.resolver.reject(TezosRpcProviderError.server(message: "Node response is empty"))
+                    return
+                }
+                rp.resolver.fulfill(data!)
+            }
+            task?.resume()
+        }
+        return rp.promise.ensure(on: queue) {
+                task = nil
+            }.map(on: queue){ (data: Data) throws -> T in
+                if let errResp = try? JSONDecoder().decode(TezosWebResponse.Error.self, from: data) {
+                    throw TezosRpcProviderError.server(message: errResp.error)
+                }
+
+                if let resp = try? JSONDecoder().decode(T.self, from: data) {
+                    return resp
+                }
+                throw TezosRpcProviderError.server(message: "Received an error message from node")
+            }
+    }
+
+    public func POST<T: Decodable>(request:RPCURLRequest, queue: DispatchQueue = .main) -> Promise<T> {
+        let rp = Promise<Data>.pending()
+        var task: URLSessionTask? = nil
+        queue.async {
+            do {
+//                debugPrint("POST \(providerURL)")
+                let url = URL(string: request.RPCURLString)
+                var urlRequest = URLRequest(url: url!, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData)
+                urlRequest.httpMethod = "POST"
+                urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+                if let p = request.parmaters {
+                    urlRequest.httpBody = try JSONSerialization.data(withJSONObject: p, options: .fragmentsAllowed)
+//                    debugPrint(p)
+                }
+
+                task = self.session.dataTask(with: urlRequest){ (data, response, error) in
+                    guard error == nil else {
+                        rp.resolver.reject(error!)
+                        return
+                    }
+                    guard data != nil else {
+                        rp.resolver.reject(TezosRpcProviderError.server(message: "Node response is empty"))
+                        return
+                    }
+                    rp.resolver.fulfill(data!)
+                }
+                task?.resume()
+            } catch {
+                rp.resolver.reject(error)
+            }
+        }
+        return rp.promise.ensure(on: queue) {
+                task = nil
+            }.map(on: queue){ (data: Data) throws -> T in
+//                debugPrint(String(data: data, encoding: .utf8) ?? "")
+
+                if let errResp = try? JSONDecoder().decode(TezosWebResponse.Error.self, from: data) {
+                    throw TezosRpcProviderError.server(message: errResp.error)
+                }
+
+                if let resp = try? JSONDecoder().decode(T.self, from: data) {
+                    return resp
+                }
+                throw TezosRpcProviderError.server(message: "Received an error message from node")
+            }
+    }
+}
 
 private extension Encodable {
     func toJSONData() throws -> Data {
