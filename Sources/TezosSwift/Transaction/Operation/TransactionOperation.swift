@@ -27,7 +27,6 @@ public class TransactionOperation:TezosOperation {
         self.kind = kind
         self.operationFees = operationFees ?? defultoperationFees
         self.parameters = parameters
-        super.init()
     }
     
     //Fa1.2
