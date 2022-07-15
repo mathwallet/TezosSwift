@@ -43,7 +43,7 @@ public struct TezosRpcProvider {
     public func getFa2TokenBalancee(address:String,contract:String,tokenId:String,chainId:String)-> Promise<String> {
         return Promise<String> { seal in
             let prim = TezosPrim(prim: "Pair", args: [TezosArg.literal(.string(address)),TezosArg.literal(.int(tokenId))])
-            let input = TezosArg.sequence(TezosSequence(TezosArg.prim(prim)))
+            let input = TezosArg.sequence(TezosSequence([TezosArg.prim(prim)]))
             let request = RunViewURL(nodeUrl: nodeUrl, input: input, chainId: chainId, mint: contract, entrypoint: "balance_of")
             POST(request: request).done { (result:FA2BalanceResult) in
                 seal.fulfill(result.balance)
