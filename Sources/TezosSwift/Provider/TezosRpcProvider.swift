@@ -11,9 +11,12 @@ import CryptoSwift
 
 public struct TezosRpcProvider {
     public var nodeUrl:String
-    
+    private var session:URLSession
     public init(nodeUrl: String) {
         self.nodeUrl = nodeUrl
+        let config = URLSessionConfiguration.default
+        self.session = URLSession(configuration: config)
+        
     }
     
     public func getXTZBalance(address:String) -> Promise<String> {
@@ -295,7 +298,7 @@ extension TezosRpcProvider {
                     seal.reject(TezosRpcProviderError.server(message: "Wrong parmaters"))
                     return
                 }
-                task = urlSession.dataTask(with: urlRequest) { (data, response, error) in
+                task = self.session.dataTask(with: urlRequest) { (data, response, error) in
                     guard error == nil else {
                         seal.reject(error!)
                         return
@@ -342,6 +345,92 @@ extension TezosRpcProvider {
     }
 }
 
+//extension TezosRpcProvider {
+//    static func GET<T: Codable>(request:RPCURLRequest, queue: DispatchQueue = .main, session: URLSession) -> Promise<K> {
+//        let rp = Promise<Data>.pending()
+//        var task: URLSessionTask? = nil
+//        queue.async {
+//            let url = URL(string: request.RPCURLString)
+//            var urlRequest = URLRequest(url: url, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData)
+//            urlRequest.httpMethod = "GET"
+//            urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//            urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+//
+//            task = session.dataTask(with: urlRequest){ (data, response, error) in
+//                guard error == nil else {
+//                    rp.resolver.reject(error!)
+//                    return
+//                }
+//                guard data != nil else {
+//                    rp.resolver.reject(TronWebError.nodeError(desc: "Node response is empty"))
+//                    return
+//                }
+//                rp.resolver.fulfill(data!)
+//            }
+//            task?.resume()
+//        }
+//        return rp.promise.ensure(on: queue) {
+//                task = nil
+//            }.map(on: queue){ (data: Data) throws -> K in
+//                if let errResp = try? JSONDecoder().decode(TezosWebResponse.Error.self, from: data) {
+//                    throw TezosRpcProviderError.server(message: errResp)
+//                }
+//
+//                if let resp = try? JSONDecoder().decode(K.self, from: data) {
+//                    return resp
+//                }
+//                throw TronWebError.nodeError(desc: "Received an error message from node")
+//            }
+//    }
+//
+//    static func POST<K: Decodable>(request:RPCURLRequest, providerURL: URL, queue: DispatchQueue = .main, session: URLSession) -> Promise<K> {
+//        let rp = Promise<Data>.pending()
+//        var task: URLSessionTask? = nil
+//        queue.async {
+//            do {
+////                debugPrint("POST \(providerURL)")
+//                var urlRequest = URLRequest(url: providerURL, cachePolicy: URLRequest.CachePolicy.reloadIgnoringCacheData)
+//                urlRequest.httpMethod = "POST"
+//                urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+//                urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
+//                if let p = parameters {
+//                    urlRequest.httpBody = try JSONSerialization.data(withJSONObject: p, options: .fragmentsAllowed)
+////                    debugPrint(p)
+//                }
+//
+//                task = session.dataTask(with: urlRequest){ (data, response, error) in
+//                    guard error == nil else {
+//                        rp.resolver.reject(error!)
+//                        return
+//                    }
+//                    guard data != nil else {
+//                        rp.resolver.reject(TronWebError.nodeError(desc: "Node response is empty"))
+//                        return
+//                    }
+//                    rp.resolver.fulfill(data!)
+//                }
+//                task?.resume()
+//            } catch {
+//                rp.resolver.reject(error)
+//            }
+//        }
+//        return rp.promise.ensure(on: queue) {
+//                task = nil
+//            }.map(on: queue){ (data: Data) throws -> K in
+////                debugPrint(String(data: data, encoding: .utf8) ?? "")
+//
+//                if let errResp = try? JSONDecoder().decode(TezosWebResponse.Error.self, from: data) {
+//                    throw TronWebError.processingError(desc: errResp.error)
+//                }
+//
+//                if let resp = try? JSONDecoder().decode(K.self, from: data) {
+//                    return resp
+//                }
+//                throw TronWebError.nodeError(desc: "Received an error message from node")
+//            }
+//    }
+//}
+
 private extension Encodable {
     func toJSONData() throws -> Data {
         return try JSONEncoder().encode(self)
@@ -366,3 +455,12 @@ public enum TezosRpcProviderError: LocalizedError {
     }
 }
 
+public struct TezosWebResponse {
+    public struct Error: Decodable {
+        public var error: String
+        
+        enum CodingKeys: String, CodingKey {
+            case error = "Error"
+        }
+    }
+}
