@@ -158,15 +158,11 @@ extension  TezosRpcProvider {
     public func sendTransaction(transaction:TezosTransaction) -> Promise<String> {
         return Promise<String> {seal in
             if let _sendString = transaction.sendString{
-                do {
-                    let isSuccess = try preapplySignedTransaction(transaction: transaction).wait()
-                    if isSuccess {
-                        let hash = try injectOperation(sendString:_sendString).wait()
-                        seal.fulfill(hash)
-                    } else {
-                        seal.reject(TezosRpcProviderError.server(message: "Transaction structure error"))
-                    }
-                } catch let error {
+                preapplySignedTransaction(transaction: transaction).then { isSuccess in
+                    return injectOperation(sendString:_sendString)
+                }.done { hash in
+                    seal.fulfill(hash)
+                }.catch { error in
                     seal.reject(error)
                 }
             }else {
@@ -182,7 +178,11 @@ extension  TezosRpcProvider {
                 let request = PreapplyOperationURL(nodeUrl: nodeUrl, branch: transaction.branch, operations: transaction.operations, protocolString: transaction.protocolString, signature:_signature)
                 POST(request: request).done { (results:PreappleOperationResult) in
                     let isSuccess = TezosPreapplyResponseParser.parse(results: results)
-                    seal.fulfill(isSuccess)
+                    if isSuccess {
+                        seal.fulfill(isSuccess)
+                    } else {
+                        seal.reject(TezosRpcProviderError.server(message: "Transaction structure error"))
+                    }
                 }.catch { error in
                     seal.reject(error)
                 }
