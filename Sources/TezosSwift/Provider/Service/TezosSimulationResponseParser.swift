@@ -81,7 +81,7 @@ public struct TezosSimulationResponseParser {
     private func parseInternalOperationResult(internalResult:InternalOperationResult) -> ParseInternalOperationResult? {
         
         if let result = internalResult.result {
-            let internalConsumedGasStr = result.consumed_gas ?? "0"
+            let internalConsumedGasStr = result.consumed_gas
             let internalConsumedStorageStr = result.paid_storage_size_diff ?? "0"
             let internalConsumedGas = Int(internalConsumedGasStr) ?? 0
             let internalConsumedStorage = Int(internalConsumedStorageStr) ?? 0

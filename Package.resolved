@@ -56,21 +56,12 @@
         }
       },
       {
-        "package": "Sr25519",
-        "repositoryURL": "https://github.com/lishuailibertine/Sr25519.swift.git",
+        "package": "TweetNacl",
+        "repositoryURL": "https://github.com/lishuailibertine/tweetnacl-swiftwrap.git",
         "state": {
           "branch": null,
-          "revision": "678f9454384273c468f65903faa76b8358a372ef",
-          "version": "0.1.6"
-        }
-      },
-      {
-        "package": "UncommonCrypto",
-        "repositoryURL": "https://github.com/lishuailibertine/UncommonCrypto.swift",
-        "state": {
-          "branch": null,
-          "revision": "db2fae114255fd17ae7bf46dff3a7997af98b626",
-          "version": "0.1.4"
+          "revision": "80afe3695c4613517c2b5d04b5d3ae41bda33647",
+          "version": "1.0.5"
         }
       }
     ]

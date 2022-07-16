@@ -48,19 +48,20 @@ public class TezosTransaction {
         self.operations.append(contentsOf: operations)
     }
 
-    public func sign(keypair:TezosKeypair) {
+    public func sign(keypair: TezosKeypair) {
         if let _forgeString = self.forgeString, let signatureData = self.signHexString(keypair: keypair, hexString:_forgeString) {
             self.signatureString = Base58.base58CheckEncode(TezosPrefix.edsig + signatureData.bytes)
             self.sendString = _forgeString + signatureData.toHexString()
         }
     }
     
-    func signHexString(keypair:TezosKeypair,hexString:String) -> Data? {
+    func signHexString(keypair:TezosKeypair, hexString:String) -> Data? {
         let messageBytes = [3] + Data(hex: hexString).bytes
-        guard let prepareData = keypair.genericHash(messageData: Data(messageBytes), outputLength: 32) else {
+        
+        guard let prepareData = try? Data(messageBytes).genericHash(outputLength: 32) else {
             return nil
         }
-        return keypair.signDigest(messageDigest: prepareData)
+        return try? keypair.signDigest(messageDigest: prepareData)
     }
 }
 
