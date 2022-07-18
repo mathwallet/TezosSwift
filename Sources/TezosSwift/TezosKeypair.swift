@@ -23,7 +23,7 @@ public struct TezosAddress {
     }
     
     public init?(_ address: String) {
-        guard let addressBytes = Base58.base58CheckDecode(address), addressBytes.count == TezosAddress.SIZE + 3 else {
+        guard let addressBytes = Base58.base58CheckDecode(address), addressBytes.count == TezosAddress.SIZE + TezosPrefix.tz1.count else {
             return nil
         }
         self.data = Data(addressBytes[3..<addressBytes.endIndex])
