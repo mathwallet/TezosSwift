@@ -19,11 +19,11 @@ public struct TezosAddress {
     
     public var address: String {
         let addressBytes = TezosPrefix.tz1 + data.bytes
-        return Base58.base58CheckEncode(addressBytes)
+        return addressBytes.base58CheckEncodedString
     }
     
     public init?(_ address: String) {
-        guard let addressBytes = Base58.base58CheckDecode(address), addressBytes.count == TezosAddress.SIZE + TezosPrefix.tz1.count else {
+        guard let addressBytes = address.base58CheckDecodedData, addressBytes.count == TezosAddress.SIZE + TezosPrefix.tz1.count else {
             return nil
         }
         self.data = Data(addressBytes[3..<addressBytes.endIndex])
@@ -46,7 +46,8 @@ public struct TezosKeypair {
     }
     
     public var privateKey: String {
-        return Base58.base58CheckEncode(TezosPrefix.edsk + secretKey.bytes)
+        let privateKeyBytes = TezosPrefix.edsk + secretKey.bytes
+        return privateKeyBytes.base58CheckEncodedString
     }
     
     public init(secretKey: Data) throws {
@@ -55,7 +56,7 @@ public struct TezosKeypair {
     }
     
     public init(privateKey: String) throws {
-        guard let privateBytes = Base58.base58CheckDecode(privateKey) else {
+        guard let privateBytes = privateKey.base58CheckDecodedData else {
             throw Error.invalidPrivateKey
         }
         try self.init(secretKey:Data(privateBytes[4..<privateBytes.endIndex]))

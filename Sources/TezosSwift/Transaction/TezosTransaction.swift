@@ -50,7 +50,8 @@ public class TezosTransaction {
 
     public func sign(keypair: TezosKeypair) {
         if let _forgeString = self.forgeString, let signatureData = self.signHexString(keypair: keypair, hexString:_forgeString) {
-            self.signatureString = Base58.base58CheckEncode(TezosPrefix.edsig + signatureData.bytes)
+            let signatureBytes = TezosPrefix.edsig + signatureData.bytes
+            self.signatureString = signatureBytes.base58CheckEncodedString
             self.sendString = _forgeString + signatureData.toHexString()
         }
     }
