@@ -26,7 +26,7 @@ public struct TezosAddress {
         guard let addressBytes = address.base58CheckDecodedData, addressBytes.count == TezosAddress.SIZE + TezosPrefix.tz1.count else {
             return nil
         }
-        self.data = Data(addressBytes[3..<addressBytes.endIndex])
+        self.data = addressBytes.subdata(in:3..<addressBytes.endIndex)
     }
     
     public init(_ data: Data) {
@@ -59,7 +59,7 @@ public struct TezosKeypair {
         guard let privateBytes = privateKey.base58CheckDecodedData else {
             throw Error.invalidPrivateKey
         }
-        try self.init(secretKey:Data(privateBytes[4..<privateBytes.endIndex]))
+        try self.init(secretKey:privateBytes.subdata(in: 4..<privateBytes.endIndex))
     }
     
     public init(seed: Data) throws {
