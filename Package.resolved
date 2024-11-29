@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "BigInt",
+        "repositoryURL": "https://github.com/attaswift/BigInt.git",
+        "state": {
+          "branch": null,
+          "revision": "a7ee11486233ba45f5ceee0b8cb3d6629ed450ef",
+          "version": "5.5.0"
+        }
+      },
+      {
         "package": "BIP39swift",
         "repositoryURL": "https://github.com/mathwallet/BIP39swift",
         "state": {
