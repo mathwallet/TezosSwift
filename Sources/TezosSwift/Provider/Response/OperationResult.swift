@@ -28,7 +28,7 @@ struct InternalOperationResult: Decodable {
 struct OperationResult:Decodable {
     var status:String
     var balance_updates:[OperationResultBalanceUpdates]?
-    var consumed_gas:String
+    var consumed_gas:String?
     var consumed_milligas:String
     var allocated_destination_contract:[String:String]?
     var paid_storage_size_diff:String?
