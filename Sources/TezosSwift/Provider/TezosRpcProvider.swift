@@ -102,22 +102,6 @@ extension  TezosRpcProvider {
         }
     }
     
-//    public func getSimulationResponse(operations: [TezosOperation],metadata:TezosBlockchainMetadata) -> Promise<SimulationResponse> {
-//        return Promise<SimulationResponse> { seal in
-//            let request = RunOperationURL(nodeUrl: nodeUrl, operations: operations, metadata: metadata)
-//            POST(request: request).done { (result:OperationContents) in
-//                let parser = TezosSimulationResponseParser(constants: metadata.constants)
-//                if let responseResult = parser.parseSimulation(result: result) {
-//                    seal.fulfill(responseResult)
-//                } else {
-//                    seal.reject(TezosRpcProviderError.server(message: "error data"))
-//                }
-//            }.catch { error in
-//                seal.reject(error)
-//            }
-//        }
-//    }
-    
     public func forge(branch: String,operations: [TezosOperation]) -> Promise<String> {
         return Promise<String> {seal in
             getHeadHash().then{ (headHash: String) -> Promise<String> in

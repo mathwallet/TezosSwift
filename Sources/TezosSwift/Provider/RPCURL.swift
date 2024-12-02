@@ -152,20 +152,6 @@ public struct RunViewURL:RPCURLRequest {
     }
 }
 
-public struct RunOperationURL:RPCURLRequest {
-    let nodeUrl: String
-    public var parmaters: Encodable?
-    
-    public init(nodeUrl: String,operations: [TezosOperation],metadata:TezosBlockchainMetadata) {
-        self.nodeUrl = nodeUrl
-        self.parmaters = RunOperationParmater(operation: SignedRunOperationPayload(contents: operations, branch: metadata.blockHash, signature: defultSignature),
-                                              chain_id: metadata.chainId)
-    }
-    public var RPCURLString: String {
-        return nodeUrl + "/chains/main/blocks/head/helpers/scripts/run_operation"
-    }
-}
-
 public struct SimulateOperationURL:RPCURLRequest {
     let nodeUrl: String
     let headHash: String
