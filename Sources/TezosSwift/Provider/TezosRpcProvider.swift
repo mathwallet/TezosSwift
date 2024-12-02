@@ -10,7 +10,7 @@ import PromiseKit
 import CryptoSwift
 
 public struct TezosRpcProvider {
-    public var nodeUrl:String
+    public var nodeUrl: String
     public var session:URLSession
     public init(nodeUrl: String) {
         self.nodeUrl = nodeUrl
@@ -19,9 +19,9 @@ public struct TezosRpcProvider {
         
     }
     
-    public func getXTZBalance(address:String) -> Promise<String> {
+    public func getXTZBalance(address: String) -> Promise<String> {
         return Promise<String> { seal in
-            GET(request: GetBalanceURL(nodeUrl: self.nodeUrl, address: address)).done { (result:String) in
+            GET(request: GetBalanceURL(nodeUrl: self.nodeUrl, address: address)).done { (result: String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -29,7 +29,7 @@ public struct TezosRpcProvider {
         }
     }
     
-    public func getFa1_2TokenBalancee(address:String,mint:String,chainId:String) -> Promise<String> {
+    public func getFa1_2TokenBalancee(address: String,mint: String,chainId: String) -> Promise<String> {
         return Promise { seal in
             let request = RunViewURL(nodeUrl: nodeUrl, input: TezosArg.literal(.string(address)), chainId: chainId, mint: mint, entrypoint: "getBalance")
             POST(request: request).done { (result:FA1_2BalanceResult) in
@@ -40,7 +40,7 @@ public struct TezosRpcProvider {
         }
     }
     
-    public func getFa2TokenBalancee(address:String,contract:String,tokenId:String,chainId:String)-> Promise<String> {
+    public func getFa2TokenBalancee(address: String,contract: String,tokenId: String,chainId: String)-> Promise<String> {
         return Promise<String> { seal in
             let prim = TezosPrim(prim: "Pair", args: [TezosArg.literal(.string(address)),TezosArg.literal(.int(tokenId))])
             let input = TezosArg.sequence(TezosSequence([TezosArg.prim(prim)]))
@@ -53,7 +53,7 @@ public struct TezosRpcProvider {
         }
     }
     
-    public func getNfts(address:String) -> Promise<[TezosNFTResult]> {
+    public func getNfts(address: String) -> Promise<[TezosNFTResult]> {
         return Promise<[TezosNFTResult]> {seal in
             GET(request: GetNFTURL(address: address, limit:"1000")).done { (results:Array<TezosNFTResult>) in
                 let filteredNfts = results.filter({$0.image.description.count > 0 && Int($0.count) ?? 0 > 0})
@@ -68,7 +68,7 @@ public struct TezosRpcProvider {
 // MARK:  Tool request
 extension  TezosRpcProvider {
     
-    public func getMetadata(address:String) -> Promise<TezosBlockchainMetadata> {
+    public func getMetadata(address: String) -> Promise<TezosBlockchainMetadata> {
         return Promise<TezosBlockchainMetadata> {seal in
             DispatchQueue.global(qos: .userInitiated).async {
                 do {
@@ -84,10 +84,12 @@ extension  TezosRpcProvider {
         }
     }
     
-    public func getSimulationResponse(operations:[TezosOperation],metadata:TezosBlockchainMetadata) -> Promise<SimulationResponse> {
+    public func getSimulationResponse(operations: [TezosOperation],
+                                      headHash: String,
+                                      metadata: TezosBlockchainMetadata) -> Promise<SimulationResponse> {
         return Promise<SimulationResponse> { seal in
-            let request = RunOperationURL(nodeUrl: nodeUrl, operations: operations, metadata: metadata)
-            POST(request: request).done { (result:OperationContents) in
+            let request = SimulateOperationURL(nodeUrl: nodeUrl, headHash: headHash, operations: operations, metadata: metadata)
+            POST(request: request).done { (result: OperationContents) in
                 let parser = TezosSimulationResponseParser(constants: metadata.constants)
                 if let responseResult = parser.parseSimulation(result: result) {
                     seal.fulfill(responseResult)
@@ -100,9 +102,9 @@ extension  TezosRpcProvider {
         }
     }
     
-    public func forge(branch:String,operations:[TezosOperation]) -> Promise<String> {
+    public func forge(branch: String,operations: [TezosOperation]) -> Promise<String> {
         return Promise<String> {seal in
-            getHeadHash().then{ (headHash:String) -> Promise<String> in
+            getHeadHash().then{ (headHash: String) -> Promise<String> in
                 let request = ForgeURL(nodeUrl: nodeUrl, headHash:headHash , operations: operations, branch: branch)
                 return POST(request: request)
             }.done { forgeString in
@@ -131,11 +133,11 @@ extension TezosRpcProvider {
         }
     }
     
-    func calculateFees(operations:[TezosOperation],metadata:TezosBlockchainMetadata) -> Promise<[TezosOperation]> {
+    func calculateFees(headHash: String = "head", operations: [TezosOperation],metadata:TezosBlockchainMetadata) -> Promise<[TezosOperation]> {
         return Promise<[TezosOperation]> {seal in
             DispatchQueue.global(qos: .userInitiated).async {
                 do {
-                    let response = try getSimulationResponse(operations: operations, metadata: metadata).wait()
+                    let response = try getSimulationResponse(operations: operations, headHash: headHash, metadata: metadata).wait()
                     let forgeResult = try forge(branch: metadata.branch, operations: operations).wait()
                     let service = TezosFeeEstimatorService()
                     var haveFeeOperations = [TezosOperation]()
@@ -176,7 +178,7 @@ extension  TezosRpcProvider {
         return Promise<Bool> {seal in
             if let _signature = transaction.signatureString {
                 let request = PreapplyOperationURL(nodeUrl: nodeUrl, branch: transaction.branch, operations: transaction.operations, protocolString: transaction.protocolString, signature:_signature)
-                POST(request: request).done { (results:[OperationContents]) in
+                POST(request: request).done { (results: [OperationContents]) in
                     let isSuccess = TezosPreapplyResponseParser.parse(results: results)
                     if isSuccess {
                         seal.fulfill(isSuccess)
@@ -192,10 +194,10 @@ extension  TezosRpcProvider {
         }
     }
     
-    func injectOperation(sendString:String) -> Promise<String> {
+    func injectOperation(sendString: String) -> Promise<String> {
         return Promise<String> { seal in
             let request = InjectOperationURL(nodeUrl: nodeUrl, sendString: sendString)
-            POST(request: request).done { (result:String) in
+            POST(request: request).done { (result: String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -208,7 +210,7 @@ extension  TezosRpcProvider {
 extension  TezosRpcProvider {
     public func getChainID() -> Promise<String> {
         return Promise<String> {seal in
-            GET(request: GetChainIDURL(nodeUrl: nodeUrl)).done { (result:String) in
+            GET(request: GetChainIDURL(nodeUrl: nodeUrl)).done { (result: String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -218,7 +220,7 @@ extension  TezosRpcProvider {
     
     public func getHeadHash() -> Promise<String> {
         return Promise<String> {seal in
-            GET(request: GetHeadHashURL(nodeUrl: nodeUrl)).done { (result:String) in
+            GET(request: GetHeadHashURL(nodeUrl: nodeUrl)).done { (result: String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -238,7 +240,7 @@ extension  TezosRpcProvider {
     
     public func getNetworkConstants() -> Promise<String> {
         return Promise<String> {seal in
-            GET(request: GetNetworkConstantsURL(nodeUrl: nodeUrl)).done { (result:String) in
+            GET(request: GetNetworkConstantsURL(nodeUrl: nodeUrl)).done { (result: String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -246,9 +248,9 @@ extension  TezosRpcProvider {
         }
     }
     
-    public func getManagerKey(address:String) -> Promise<String> {
+    public func getManagerKey(address: String) -> Promise<String> {
         return Promise<String> {seal in
-            GET(request: GetManagerKeyURL(nodeUrl: nodeUrl,address: address)).done { (result:String) in
+            GET(request: GetManagerKeyURL(nodeUrl: nodeUrl,address: address)).done { (result: String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)
@@ -256,9 +258,9 @@ extension  TezosRpcProvider {
         }
     }
     
-    public func getCounter(address:String) -> Promise<String> {
+    public func getCounter(address: String) -> Promise<String> {
         return Promise<String> {seal in
-            GET(request: GetCounterURL(nodeUrl: nodeUrl,address: address)).done { (result:String) in
+            GET(request: GetCounterURL(nodeUrl: nodeUrl,address: address)).done { (result: String) in
                 seal.fulfill(result)
             }.catch { error in
                 seal.reject(error)

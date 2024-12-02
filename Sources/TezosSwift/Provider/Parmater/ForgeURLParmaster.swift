@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct ForgeURLParmaster:Encodable {
+public struct ForgeURLParmaster: Encodable {
     public let contents: [TezosOperation]
     public let branch: String
 }

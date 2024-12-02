@@ -15,19 +15,19 @@ public class TezosTransaction {
     public var metadata:TezosBlockchainMetadata
     public var operations = [TezosOperation]()
     
-    public var forgeString:String?
-    public var signatureString:String?
-    public var sendString:String?
+    public var forgeString: String?
+    public var signatureString: String?
+    public var sendString: String?
     
-    public var branch:String {
+    public var branch: String {
         return self.metadata.blockHash
     }
     
-    public var counter:Int {
+    public var counter: Int {
         return self.metadata.counter
     }
     
-    public var protocolString:String {
+    public var protocolString: String {
         return self.metadata.protocolString
     }
     
@@ -43,7 +43,7 @@ public class TezosTransaction {
         self.operations.removeAll()
     }
     
-    public func configOperations(operations:[TezosOperation]) {
+    public func configOperations(operations: [TezosOperation]) {
         self.operations.removeAll()
         self.operations.append(contentsOf: operations)
     }
@@ -56,7 +56,7 @@ public class TezosTransaction {
         }
     }
     
-    func signHexString(keypair:TezosKeypair, hexString:String) -> Data? {
+    func signHexString(keypair:TezosKeypair, hexString: String) -> Data? {
         let messageBytes = [3] + Data(hex: hexString).bytes
         
         guard let prepareData = try? Data(messageBytes).genericHash(outputLength: 32) else {

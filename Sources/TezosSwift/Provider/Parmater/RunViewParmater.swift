@@ -8,9 +8,9 @@
 import Foundation
 
 public struct RunViewParmater: Encodable {
-    public let unparsing_mode:String
-    public let contract:String
-    public let entrypoint:String
-    public let chain_id:String
-    public let input:TezosArg
+    public let unparsing_mode: String
+    public let contract: String
+    public let entrypoint: String
+    public let chain_id: String
+    public let input: TezosArg
 }
