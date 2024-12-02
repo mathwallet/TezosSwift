@@ -8,17 +8,18 @@
 import Foundation
 
 public struct TezosFeeEstimatorService {
-    
-    public func getForgedOperationsSize(forgeResult:String) -> Int {
+    private let MILLIGAS_BUFFER = 100 * 1000
+    private let STORAGE_BUFFER = 20
+    public func getForgedOperationsSize(forgeResult: String) -> Int {
         return forgeResult.count/2 + 64
     }
     
-    public func calculateFeesAndCreateOperation(response:SimulationResponse,operation:TransactionOperation,operationSize:Int) -> TransactionOperation{
+    public func calculateFeesAndCreateOperation(response:SimulationResponse,operation:TransactionOperation,operationSize: Int) -> TransactionOperation{
         let fees = self.calculateFees(response: response, operationSize: operationSize)
         return self.createOperation(operation: operation, fees: fees)
     }
     
-    public func calculateFees(response:SimulationResponse,operationSize:Int) -> OperationFees {
+    public func calculateFees(response:SimulationResponse,operationSize: Int) -> OperationFees {
         var listOfFees = [OperationFees]()
         var accumulatedFee = OperationFees(fee: 0, gasLimit: 0, storageLimit: 0,extrafees: ExtraFees())
         response.simulations.forEach { simulatedFee in
@@ -49,7 +50,7 @@ public struct TezosFeeEstimatorService {
         return 200 + nanoIntToInt(storageFee) + nanoIntToInt(gasFee)
     }
     
-   func nanoIntToInt(_ nanoInt:Int) -> Int {
+   func nanoIntToInt(_ nanoInt: Int) -> Int {
         if nanoInt % 1000 == 0{
            return nanoInt/1000
         }

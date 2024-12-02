@@ -3,14 +3,14 @@
 import Foundation
 
 public struct SimulationResponse {
-    public var simulations:[SimulatedFees]
+    public var simulations: [SimulatedFees]
 }
 
 public struct SimulatedFees {
-    public var type:String
+    public var type: String
     public var extraFees:ExtraFees
-    public var consumedGas:Int
-    public var consumedStorage:Int
+    public var consumedGas: Int
+    public var consumedStorage: Int
 }
 
 public struct ExtraFees {
@@ -48,8 +48,8 @@ public struct ExtraFees {
 
 public struct BurnFee:ExtraFee {
     public var type:ExtraFeeType
-    public var fee:String
-    public init(feeString:String) {
+    public var fee: String
+    public init(feeString: String) {
         type = .BURN_FEE
         fee = feeString
     }
@@ -57,8 +57,8 @@ public struct BurnFee:ExtraFee {
 
 public struct AllocationFee:ExtraFee {
     public var type:ExtraFeeType
-    public var fee:String
-    public init(feeString:String) {
+    public var fee: String
+    public init(feeString: String) {
         type = .ALLOCATION_FEE
         fee = feeString
     }
@@ -66,8 +66,8 @@ public struct AllocationFee:ExtraFee {
 
 public struct OriginationFee:ExtraFee {
     public var type:ExtraFeeType
-    public var fee:String
-    public init(feeString:String) {
+    public var fee: String
+    public init(feeString: String) {
         type = .ORIGINATION_FEE
         fee = feeString
     }
@@ -75,10 +75,10 @@ public struct OriginationFee:ExtraFee {
 
 public protocol ExtraFee {
     var type:ExtraFeeType {get}
-    var fee:String {set get}
+    var fee: String {set get}
 }
 
-public enum ExtraFeeType:String {
+public enum ExtraFeeType: String {
     case BURN_FEE
     case ALLOCATION_FEE
     case ORIGINATION_FEE

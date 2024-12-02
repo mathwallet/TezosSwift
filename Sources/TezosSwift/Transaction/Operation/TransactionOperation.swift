@@ -3,14 +3,14 @@ import Foundation
 public let defultoperationFees = OperationFees(fee: 0, gasLimit: MAXGAS, storageLimit: MAXSTORAGE)
 public class TransactionOperation:TezosOperation {
     var kind:TezosOperationKind
-    var source:String
-    var destination:String
-    var counter:String
-    var amount:String = "0"
+    var source: String
+    var destination: String
+    var counter: String
+    var amount: String = "0"
     public var operationFees:OperationFees
     public var parameters:TezosParameters?
     
-    public init(source:String,destination:String,amount:String,counter:String,kind:TezosOperationKind = .transaction,operationFees:OperationFees? = nil,parameters:TezosParameters? = nil) {
+    public init(source: String,destination: String,amount: String,counter: String,kind:TezosOperationKind = .transaction,operationFees:OperationFees? = nil,parameters:TezosParameters? = nil) {
         self.source = source
         self.destination = destination
         self.counter = counter
@@ -51,20 +51,20 @@ public class TransactionOperation:TezosOperation {
 // createParameters
 extension TransactionOperation {
     
-    public func configFa1_2Prameter(source:String,toTokenAddress:String,tokenAmount:String) {
-        let amountArgs:[TezosArg] = [TezosArg.literal(TezosLiteral.string(toTokenAddress)),TezosArg.literal(TezosLiteral.int(tokenAmount))]
+    public func configFa1_2Prameter(source: String,toTokenAddress: String,tokenAmount: String) {
+        let amountArgs: [TezosArg] = [TezosArg.literal(TezosLiteral.string(toTokenAddress)),TezosArg.literal(TezosLiteral.int(tokenAmount))]
         let amountPrim = TezosPrim(prim: "Pair",args: amountArgs)
         
-        let fromArgs:[TezosArg] = [TezosArg.literal(TezosLiteral.string(source)),TezosArg.prim(amountPrim)]
+        let fromArgs: [TezosArg] = [TezosArg.literal(TezosLiteral.string(source)),TezosArg.prim(amountPrim)]
         let valuePrim = TezosPrim(prim: "Pair", args:fromArgs)
         self.parameters = TezosParameters(entrypoint: TezosParameters.Entrypoint.custom("transfer"), value: TezosArg.prim(valuePrim))
     }
     
-    public func configFa2Prameter(source:String,toTokenAddress:String,tokenAmount:String,tokenId:String) {
-        let amountArgs:[TezosArg] = [TezosArg.literal(TezosLiteral.int(tokenId)),TezosArg.literal(TezosLiteral.int(tokenAmount))]
+    public func configFa2Prameter(source: String,toTokenAddress: String,tokenAmount: String,tokenId: String) {
+        let amountArgs: [TezosArg] = [TezosArg.literal(TezosLiteral.int(tokenId)),TezosArg.literal(TezosLiteral.int(tokenAmount))]
         let amountPrim = TezosPrim(prim: "Pair", args: amountArgs)
         
-        let toArgs:[TezosArg] = [TezosArg.literal(TezosLiteral.string(toTokenAddress)),TezosArg.prim(amountPrim)]
+        let toArgs: [TezosArg] = [TezosArg.literal(TezosLiteral.string(toTokenAddress)),TezosArg.prim(amountPrim)]
         let toPrim = TezosPrim(prim: "Pair", args:toArgs)
         
         let fromArgs = [TezosArg.literal(TezosLiteral.string(source)),TezosArg.sequence([TezosArg.prim(toPrim)])]

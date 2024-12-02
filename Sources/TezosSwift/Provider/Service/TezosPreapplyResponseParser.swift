@@ -9,7 +9,7 @@ import Foundation
 
 public struct TezosPreapplyResponseParser {
     
-    public static func parse(results:[OperationContents]) -> Bool {
+    public static func parse(results: [OperationContents]) -> Bool {
         for result in results {
             if let contents = result.contents {
                 for content in contents {

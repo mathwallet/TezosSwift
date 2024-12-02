@@ -26,7 +26,7 @@ public struct TezosAddress {
         guard let addressBytes = address.base58CheckDecodedData, addressBytes.count == TezosAddress.SIZE + TezosPrefix.tz1.count else {
             return nil
         }
-        self.data = addressBytes.subdata(in:3..<addressBytes.endIndex)
+        self.data = addressBytes.subdata(in: 3..<addressBytes.endIndex)
     }
     
     public init(_ data: Data) {
