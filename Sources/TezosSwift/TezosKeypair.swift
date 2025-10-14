@@ -18,7 +18,7 @@ public struct TezosAddress {
     public let data: Data
     
     public var address: String {
-        let addressBytes = TezosPrefix.tz1 + data.bytes
+        let addressBytes = TezosPrefix.tz1 + data.byteArray
         return addressBytes.base58CheckEncodedString
     }
     
@@ -46,7 +46,7 @@ public struct TezosKeypair {
     }
     
     public var privateKey: String {
-        let privateKeyBytes = TezosPrefix.edsk + secretKey.bytes
+        let privateKeyBytes = TezosPrefix.edsk + secretKey.byteArray
         return privateKeyBytes.base58CheckEncodedString
     }
     
@@ -68,7 +68,7 @@ public struct TezosKeypair {
     }
     
     public init(mnemonics: String, path: String = "m/44'/1729'/0'/0'") throws {
-        guard let mnemonicSeed = BIP39.seedFromMmemonics(mnemonics) else {
+        guard let mnemonicSeed = BIP39.seedFromMnemonics(mnemonics) else {
             throw Error.invalidMnemonic
         }
         let (derivedSeed,_) = TezosKeypair.ed25519DeriveKey(path: path, seed: mnemonicSeed)

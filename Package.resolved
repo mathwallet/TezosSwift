@@ -15,8 +15,8 @@
         "repositoryURL": "https://github.com/attaswift/BigInt.git",
         "state": {
           "branch": null,
-          "revision": "a7ee11486233ba45f5ceee0b8cb3d6629ed450ef",
-          "version": "5.5.0"
+          "revision": "e07e00fa1fd435143a2dcf8b7eec9a7710b2fdfe",
+          "version": "5.7.0"
         }
       },
       {
@@ -24,8 +24,8 @@
         "repositoryURL": "https://github.com/mathwallet/BIP39swift",
         "state": {
           "branch": null,
-          "revision": "6e654c1fedac7dc3f01443d8bdf108ab6d50245d",
-          "version": "1.0.1"
+          "revision": "722786f0d4503461657fd9c36a6ef9c85eba33ea",
+          "version": "2.0.1"
         }
       },
       {
@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/krzyzanowskim/CryptoSwift.git",
         "state": {
           "branch": null,
-          "revision": "039f56c5d7960f277087a0be51f5eb04ed0ec073",
-          "version": "1.5.1"
+          "revision": "e45a26384239e028ec87fbcc788f513b67e10d8f",
+          "version": "1.9.0"
         }
       },
       {

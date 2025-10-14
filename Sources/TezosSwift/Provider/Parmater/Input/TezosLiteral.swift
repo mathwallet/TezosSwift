@@ -19,7 +19,7 @@ public enum TezosLiteral: Codable, Hashable, Equatable {
             return
         }
         if let value = try container.decodeIfPresent(String.self, forKey: .bytes) {
-            self = .bytes(Data(hex: value).bytes)
+            self = .bytes(Data(hex: value).byteArray)
             return
         }
         throw SerializationError.invalidType

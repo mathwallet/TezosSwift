@@ -11,6 +11,6 @@ import CryptoSwift
 
 extension Data {
     public func genericHash(outputLength: Int) throws -> Data {
-        return try Blake2.hash(.b2b, size: outputLength, bytes: self.bytes)
+        return try Blake2.hash(.b2b, size: outputLength, bytes: self.byteArray)
     }
 }

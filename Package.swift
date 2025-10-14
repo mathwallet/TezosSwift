@@ -18,8 +18,7 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         .package(name: "Base58Swift", url: "https://github.com/mathwallet/Base58Swift", from: "0.0.1"),
         .package(name: "Blake2", url: "https://github.com/lishuailibertine/Blake2.swift", from: "0.1.3"),
-        .package(url: "https://github.com/krzyzanowskim/CryptoSwift.git", from: "1.4.1"),
-        .package(name:"BIP39swift", url: "https://github.com/mathwallet/BIP39swift", from: "1.0.1"),
+        .package(name:"BIP39swift", url: "https://github.com/mathwallet/BIP39swift", from: "2.0.1"),
         .package(url: "https://github.com/mxcl/PromiseKit.git", from: "8.1.1"),
         .package(name: "TweetNacl", url: "https://github.com/lishuailibertine/tweetnacl-swiftwrap.git", from: "1.0.5"),
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.0.0"),
@@ -32,7 +31,6 @@ let package = Package(
             dependencies: [
                            "Base58Swift",
                            "Blake2",
-                           "CryptoSwift",
                            "BIP39swift",
                            "PromiseKit",
                            "TweetNacl",
